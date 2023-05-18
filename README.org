@@ -1,0 +1,252 @@
+# -*- mode: org; coding: utf-8; -*-
+#+OPTIONS: toc:2 num:nil html-style:nil
+#+author:
+#+title:  MusicBrainz & ListenBrainz & other
+
+[[file:img/musicbrainz-logo.svg]]
+
+MusicBrainz is a community-maintained open source encyclopedia of [[https://musicbrainz.org/doc/About][music information]]. The REST-based [[https://musicbrainz.org/doc/MusicBrainz_API][webservice API]] can be used for direct access to MusicBrainz data with output in XML and JSON.
+
+This code provides a simple, incomplete yet possibly useful interface to some of the MusicBrainz and ListenBrainz APIs from emacs for exploratory  use in =org-mode= or behind the scenes sending listening metadata.
+
+** some examples
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-search "recording" "taema")
+#+END_SRC
+
+Autechre albums & eps
+
+docs provide the example URL https://musicbrainz.org/ws/2/release-group?artist=410c9baf-5469-44f6-9852-826524b80c61&type=album|ep
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-browse "release-group" "artist" "410c9baf-5469-44f6-9852-826524b80c61" "album|ep")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-search-artist "Autechre")
+#+END_SRC
+
+#+RESULTS:
+| Autechre | 410c9baf-5469-44f6-9852-826524b80c61 |
+
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-search-label "Warp")
+#+END_SRC
+
+#+RESULTS:
+| Warp | 46f0f4cd-8aab-4b33-b698-f459faf64190 |
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-search-label "Music" 5)
+#+END_SRC
+
+#+RESULTS:
+| 100 | Sony Music      | global brand, excluding JP, owned by Sony Music Entertainment (1991 ongoing)                          | 9e6b4d7f-4958-4db7-8504-d89e315836af |
+|  96 | [no label]      | Special purpose label – white labels, self-published releases and other “no label” releases (ongoing) | 157afde4-4bf5-4039-8ad2-5a15acc85176 |
+|  91 | Polydor         | worldwide imprint, see annotation (1913-04-02 ongoing)                                                | ce24ab18-1bd6-4293-a486-546d13d6a5e2 |
+|  91 | Universal Music | plain logo: “Universal Music” (ongoing)                                                               | 13a464dc-b9fd-4d16-a4f4-d4316f6a46c7 |
+|  90 | ZYX Music       | (1992 ongoing)                                                                                        | 6844efda-a451-431e-8cc1-48ab111b4711 |
+
+** MBID
+
+“One of MusicBrainz' aims is to be the universal lingua franca for music by providing a reliable and unambiguous form of music identification; this music identification is performed through the use of MusicBrainz Identifiers  (MBIDs). An MBID is a 36 character Universally Unique Identifier that is permanently assigned to each entity in the database, i.e. artists, release groups, releases, recordings, works, labels, areas, places and URLs. MBIDs are also assigned to Tracks, though tracks do not share many other properties of entities.”
+
+https://musicbrainz.org/doc/MusicBrainz_Identifier
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-artist-to-mbid "Autechre")
+#+END_SRC
+
+=410c9baf-5469-44f6-9852-826524b80c61=
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-mbid-p "410c9baf-5469-44f6-9852-826524b80c61")
+#+END_SRC
+
+** ambiguity
+
+from the docs…
+
+#+BEGIN_SRC text
+John Williams, the soundtrack composer and conductor, has an artist MBID of 53b106e7-0cc6-42cc-ac95-ed8d30a3a98e
+John Williams, the classical guitar player, has an artist MBID of 8b8a38a9-a290-4560-84f6-3d4466e8d791
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-disambiguate-artist "John Williams")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-artist-to-mbid "Bad Seeds")
+#+END_SRC
+
+=7feb02f2-51fa-422d-838e-2c14ecb4c7b8= →  Tomorrows Bad Seeds
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-disambiguate-artist "Bad Seeds")
+#+END_SRC
+
+#+RESULTS:
+|     | Artist: Bad Seeds                                         | MBID                                 |
+| 100 | Tomorrows Bad Seeds, nil                                  | [[https://musicbrainz.org/artist/7feb02f2-51fa-422d-838e-2c14ecb4c7b8][7feb02f2-51fa-422d-838e-2c14ecb4c7b8]] |
+|  98 | The Bad Seeds, 60s Texas rock band                        | [[https://musicbrainz.org/artist/3e593712-9f70-4b7a-b21b-466016998a3d][3e593712-9f70-4b7a-b21b-466016998a3d]] |
+|  98 | The Bad Seeds, 60's US garage rock band from Erlanger, KY | [[https://musicbrainz.org/artist/34bc9a97-fa78-424e-8ca8-a904f978f041][34bc9a97-fa78-424e-8ca8-a904f978f041]] |
+|  98 | The Bad Seeds, backing band for Nick Cave                 | [[https://musicbrainz.org/artist/eb2a8edc-5670-4896-82be-87db38de9583][eb2a8edc-5670-4896-82be-87db38de9583]] |
+|  86 | Nick Cave & the Bad Seeds, nil                            | [[https://musicbrainz.org/artist/172e1f1a-504d-4488-b053-6344ba63e6d0][172e1f1a-504d-4488-b053-6344ba63e6d0]] |
+|  50 | The Lightning Seeds, nil                                  | [[https://musicbrainz.org/artist/1ba601a0-3401-4b28-8ddd-9af8203661e8][1ba601a0-3401-4b28-8ddd-9af8203661e8]] |
+
+
+
+
+[[file:img/listenbrainz-logo.svg]]
+* listening
+
+- https://listenbrainz.org
+- https://listenbrainz.readthedocs.io/
+
+* examples
+
+#+BEGIN_SRC emacs-lisp
+(setq listenbrainz-api-token "000-000-000")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-validate-token listenbrainz-api-token)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-listens "zzzkt")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-listens "zzzkt" 33)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-submit-single-listen "farmersmanual" "808808008088 (11)")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-submit-single-listen "Matthew Thomas" "Taema" "Architecture")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-submit-playing-now "farmersmanual" "808808008088 (11)")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-playing-now "zzzkt")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-stats-artists "zzzkt") ;; defaults to ’all time’
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-stats-releases "zzzkt")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(listenbrainz-stats-recordings "zzzkt" 13 "month")
+#+END_SRC
+
+* incompleteness
+
+** Core API endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#core-api-endpoints
+
+| POST /1/submit-listens                                  | listenbrainz-submit-listen        |
+|                                                         | listenbrainz-submit-single-listen |
+|                                                         | listenbrainz-submit-playing-now   |
+| GET /1/validate-token                                   | listenbrainz-validate-token       |
+| POST /1/delete-listen                                   | -                                 |
+| GET /1/user/(playlist_user_name)/playlists/collaborator | -                                 |
+| GET /1/user/(playlist_user_name)/playlists/createdfor   | -                                 |
+| GET /1/users/(user_list)/recent-listens                 | -                                 |
+| GET /1/user/(user_name)/similar-users                   | -                                 |
+| GET /1/user/(user_name)/listen-count                    | -                                 |
+| GET /1/user/(user_name)/playing-now                     | listenbrainz-playing-now          |
+| GET /1/user/(user_name)/similar-to/(other_user_name)    | -                                 |
+| GET /1/user/(playlist_user_name)/playlists              | -                                 |
+| GET /1/user/(user_name)/listens                         | listenbrainz-listens              |
+| GET /1/latest-import                                    | -                                 |
+| POST /1/latest-import                                   | -                                 |
+
+** Feedback API Endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#feedback-api-endpoints
+
+| POST /1/feedback/recording-feedback                          | - |
+| GET /1/feedback/recording/(recording_msid)/get-feedback      | - |
+| GET /1/feedback/user/(user_name)/get-feedback-for-recordings | – |
+| GET /1/feedback/user/(user_name)/get-feedback                | - |
+
+** Recording Recommendation API Endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#core-api-endpoints
+
+| GET /1/cf/recommendation/user/(user_name)/recording        | - |
+
+** Recording Recommendation Feedback API Endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#recording-recommendation-feedback-api-endpoints
+
+| POST /1/recommendation/feedback/submit                     | - |
+| POST /1/recommendation/feedback/delete                     | - |
+| GET /1/recommendation/feedback/user/(user_name)/recordings | - |
+| GET /1/recommendation/feedback/user/(user_name)            | - |
+
+** Statistics API Endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#statistics-api-endpoints
+
+| GET /1/stats/sitewide/artists                    | -                             |
+| GET /1/stats/user/(user_name)/listening-activity | -                             |
+| GET /1/stats/user/(user_name)/daily-activity     | -                             |
+| GET /1/stats/user/(user_name)/recordings         | listenbrainz-stats-recordings |
+| GET /1/stats/user/(user_name)/artist-map         | -                             |
+| GET /1/stats/user/(user_name)/releases           | listenbrainz-stats-releases   |
+| GET /1/stats/user/(user_name)/artists            | listenbrainz-stats-artists    |
+
+** Status API Endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#status-api-endpoints
+
+| GET /1/status/get-dump-info | - |
+
+** User Timeline API Endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#user-timeline-api-endpoints
+
+| POST /1/user/(user_name)/timeline-event/create/notification | - |
+| POST /1/user/(user_name)/timeline-event/create/recording    | - |
+| POST /1/user/(user_name)/feed/events/delete                 | - |
+| GET /1/user/(user_name)/feed/events                         | - |
+
+** Social API Endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#social-api-endpoints
+
+| GET /1/user/(user_name)/followers | listenbrainz-followers |
+| GET /1/user/(user_name)/following | listenbrainz-following |
+| POST /1/user/(user_name)/unfollow | -                      |
+| POST /1/user/(user_name)/follow   | -                      |
+
+** Pinned Recording API Endpoints
+
+https://listenbrainz.readthedocs.io/en/production/dev/api/#pinned-recording-api-endpoints
+
+| POST /1/pin/unpin                 | - |
+| POST /1/pin                       | - |
+| POST /1/pin/delete/(row_id)       | - |
+| GET /1/(user_name)/pins/following | - |
+| GET /1/(user_name)/pins           | - |
+
+
+
+* further
+- https://listenbrainz.org/user/troi-bot/playlists/
+- https://github.com/metabrainz/bono-data-sets/blob/main/top_discoveries.py
