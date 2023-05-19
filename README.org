@@ -77,17 +77,18 @@ The MBID can be used for specific lookups (and checked if needed using =musicbra
 (musicbrainz-search-label "Warp")
 #+END_SRC
 
-| Warp | 46f0f4cd-8aab-4b33-b698-f459faf64190 |
+| Warp | [[https://musicbrainz.org/label/46f0f4cd-8aab-4b33-b698-f459faf64190][46f0f4cd-8aab-4b33-b698-f459faf64190]] |
 
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-search-label "Music" 5)
 #+END_SRC
 
-| 100 | Sony Music      | global brand, excluding JP, owned by Sony Music Entertainment (1991 ongoing)                          | 9e6b4d7f-4958-4db7-8504-d89e315836af |
-|  96 | [no label]      | Special purpose label – white labels, self-published releases and other “no label” releases (ongoing) | 157afde4-4bf5-4039-8ad2-5a15acc85176 |
-|  91 | Polydor         | worldwide imprint, see annotation (1913-04-02 ongoing)                                                | ce24ab18-1bd6-4293-a486-546d13d6a5e2 |
-|  91 | Universal Music | plain logo: “Universal Music” (ongoing)                                                               | 13a464dc-b9fd-4d16-a4f4-d4316f6a46c7 |
-|  90 | ZYX Music       | (1992 ongoing)                                                                                        | 6844efda-a451-431e-8cc1-48ab111b4711 |
+| 100 | Sony Music      | global brand, excluding JP, owned by Sony Music Entertainment (1991 ongoing)                          | [[https://musicbrainz.org/label/9e6b4d7f-4958-4db7-8504-d89e315836af][9e6b4d7f-4958-4db7-8504-d89e315836af]] |
+|  96 | [no label]      | Special purpose label – white labels, self-published releases and other “no label” releases (ongoing) | [[https://musicbrainz.org/label/157afde4-4bf5-4039-8ad2-5a15acc85176][157afde4-4bf5-4039-8ad2-5a15acc85176]] |
+|  91 | Polydor         | worldwide imprint, see annotation (1913-04-02 ongoing)                                                | [[https://musicbrainz.org/label/ce24ab18-1bd6-4293-a486-546d13d6a5e2][ce24ab18-1bd6-4293-a486-546d13d6a5e2]] |
+|  91 | Universal Music | plain logo: “Universal Music” (ongoing)                                                               | [[https://musicbrainz.org/label/13a464dc-b9fd-4d16-a4f4-d4316f6a46c7][13a464dc-b9fd-4d16-a4f4-d4316f6a46c7]] |
+|  90 | ZYX Music       | (1992 ongoing)                                                                                        | [[https://musicbrainz.org/label/6844efda-a451-431e-8cc1-48ab111b4711][6844efda-a451-431e-8cc1-48ab111b4711]] |
+
 
 ** MBID
 

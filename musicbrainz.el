@@ -319,8 +319,8 @@ Optionally return LIMIT number of results."
       (lambda (i)
         (let-alist i
                    (if (not limit)
-                       (format "%s | %s |\n" .name .id)
-                       (format "%s | %s | %s (%s%s) | %s |\n"
+                       (format "%s | [[https://musicbrainz.org/label/%s][%s]] |\n" .name .id .id)
+                       (format "%s | %s | %s (%s%s) |  [[https://musicbrainz.org/label/%s][%s]]  |\n"
                                .score .name
                                (if .disambiguation .disambiguation "")
                                (if .life-span.begin
@@ -328,7 +328,7 @@ Optionally return LIMIT number of results."
                                (if .life-span.end
                                    (format "—%s" .life-span.end)
                                    "ongoing")
-                               .id))))
+                               .id .id))))
       .labels))))
 
 
