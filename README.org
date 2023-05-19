@@ -32,14 +32,17 @@ The equivalent function (which returns a raw response as an alist) would be…
 
 For slightly more legible output wrap with =musicbrainz-format=
 #+BEGIN_SRC emacs-lisp
-(musicbrainz-format (musicbrainz-browse "release-group" "artist" "410c9baf-5469-44f6-9852-826524b80c61" "album|ep"))
+(musicbrainz-format
+ (musicbrainz-browse "release-group"
+                     "artist"
+                     "410c9baf-5469-44f6-9852-826524b80c61"
+                     "album|ep"))
 #+END_SRC
 
-A more interactive approach could start with  =(musicbrainz-search "artist" "Autechre")= or =(musicbrainz-search-artist "Autechre")= Which returns the MBID required for the lookup → =410c9baf-5469-44f6-9852-826524b80c61=
+A more interactive approach could start with  =(musicbrainz-search "artist" "Autechre")= or =(musicbrainz-search-artist "Autechre")= Which returns an MBID required for the lookup  =410c9baf-5469-44f6-9852-826524b80c61=
 
-The MBID can be checked if needed,  with =(musicbrainz-mbid-p "410c9baf-5469-44f6-9852-826524b80c61")=
+The MBID can be used for specific lookups (and checked if needed using =musicbrainz-mbid-p= )
 
-The MBID can then be used for specific lookups…
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-lookup "artist" "410c9baf-5469-44f6-9852-826524b80c61" "releases")
 #+END_SRC
@@ -49,7 +52,6 @@ The MBID can then be used for specific lookups…
 #+END_SRC
 
 | Autechre | electronic music duo | Group | [[https://musicbrainz.org/artist/410c9baf-5469-44f6-9852-826524b80c61][410c9baf-5469-44f6-9852-826524b80c61]] |
-
 
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-lookup-artist-releases  "410c9baf-5469-44f6-9852-826524b80c61")
@@ -71,19 +73,16 @@ The MBID can then be used for specific lookups…
 
 | [untitled] | [[https://musicbrainz.org/recording/83730176-89ec-41a5-a4b6-476998f6291c][83730176-89ec-41a5-a4b6-476998f6291c]] |
 
-
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-search-label "Warp")
 #+END_SRC
 
-#+RESULTS:
 | Warp | 46f0f4cd-8aab-4b33-b698-f459faf64190 |
 
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-search-label "Music" 5)
 #+END_SRC
 
-#+RESULTS:
 | 100 | Sony Music      | global brand, excluding JP, owned by Sony Music Entertainment (1991 ongoing)                          | 9e6b4d7f-4958-4db7-8504-d89e315836af |
 |  96 | [no label]      | Special purpose label – white labels, self-published releases and other “no label” releases (ongoing) | 157afde4-4bf5-4039-8ad2-5a15acc85176 |
 |  91 | Polydor         | worldwide imprint, see annotation (1913-04-02 ongoing)                                                | ce24ab18-1bd6-4293-a486-546d13d6a5e2 |
@@ -100,7 +99,7 @@ https://musicbrainz.org/doc/MusicBrainz_Identifier
 (musicbrainz-artist-to-mbid "Autechre")
 #+END_SRC
 
-=410c9baf-5469-44f6-9852-826524b80c61=
+returns =410c9baf-5469-44f6-9852-826524b80c61=
 
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-mbid-p "410c9baf-5469-44f6-9852-826524b80c61")
@@ -108,7 +107,7 @@ https://musicbrainz.org/doc/MusicBrainz_Identifier
 
 ** ambiguity
 
-from the docs…
+From the docs…
 
 #+BEGIN_SRC text
 John Williams, the soundtrack composer and conductor, has an artist MBID of 53b106e7-0cc6-42cc-ac95-ed8d30a3a98e
@@ -116,14 +115,21 @@ John Williams, the classical guitar player, has an artist MBID of 8b8a38a9-a290-
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(musicbrainz-disambiguate-artist "John Williams")
+(musicbrainz-disambiguate-artist "John Williams" 3)
 #+END_SRC
+
+|     | Artist: John Williams                                         | MBID                                 |
+| 100 | John Williams, American score composer                        | [[https://musicbrainz.org/artist/53b106e7-0cc6-42cc-ac95-ed8d30a3a98e][53b106e7-0cc6-42cc-ac95-ed8d30a3a98e]] |
+|  94 | John Williams, classical guitarist                            | [[https://musicbrainz.org/artist/8b8a38a9-a290-4560-84f6-3d4466e8d791][8b8a38a9-a290-4560-84f6-3d4466e8d791]] |
+|  92 | John Williams, English A&R executive, producer, songwriter... | [[https://musicbrainz.org/artist/eb5d7680-0c00-4b0c-b6eb-9605ff77723d][eb5d7680-0c00-4b0c-b6eb-9605ff77723d]] |
+
+There are several “Bad Seeds”
 
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-artist-to-mbid "Bad Seeds")
 #+END_SRC
 
-=7feb02f2-51fa-422d-838e-2c14ecb4c7b8= →  Tomorrows Bad Seeds
+Which returns the MBID =7feb02f2-51fa-422d-838e-2c14ecb4c7b8= for “Tomorrows Bad Seeds”, however…
 
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-disambiguate-artist "Bad Seeds" 7)
