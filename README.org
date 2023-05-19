@@ -3,32 +3,73 @@
 #+author:
 #+title:  MusicBrainz & ListenBrainz & other
 
+* MusicBrainz
+
 [[file:img/musicbrainz-logo.svg]]
 
 MusicBrainz is a community-maintained open source encyclopedia of [[https://musicbrainz.org/doc/About][music information]]. The REST-based [[https://musicbrainz.org/doc/MusicBrainz_API][webservice API]] can be used for direct access to MusicBrainz data with output in XML and JSON.
 
 This code provides a simple, incomplete yet possibly useful interface to some of the MusicBrainz and ListenBrainz APIs from emacs for exploratory  use in =org-mode= or behind the scenes sending listening metadata.
 
+*  MusicBrainz API
+
+- Recording documentation: https://musicbrainz.org/doc/Recording
+- Release documentation: https://musicbrainz.org/doc/Release
+- Artist documentation: https://musicbrainz.org/doc/Artist
+
+** searching & browsing
+
+Search supports the full  [[https://lucene.apache.org/core/7_7_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description][Lucene search syntax]].
+
 ** some examples
 
-#+BEGIN_SRC emacs-lisp
-(musicbrainz-search "recording" "taema")
-#+END_SRC
+The API docs provide an example search for “Autechre albums & eps” using the URL https://musicbrainz.org/ws/2/release-group?artist=410c9baf-5469-44f6-9852-826524b80c61&type=album|ep
 
-Autechre albums & eps
-
-docs provide the example URL https://musicbrainz.org/ws/2/release-group?artist=410c9baf-5469-44f6-9852-826524b80c61&type=album|ep
-
+The equivalent function (which returns a raw response as an alist) would be…
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-browse "release-group" "artist" "410c9baf-5469-44f6-9852-826524b80c61" "album|ep")
 #+END_SRC
 
+For slightly more legible output wrap with =musicbrainz-format=
 #+BEGIN_SRC emacs-lisp
-(musicbrainz-search-artist "Autechre")
+(musicbrainz-format (musicbrainz-browse "release-group" "artist" "410c9baf-5469-44f6-9852-826524b80c61" "album|ep"))
 #+END_SRC
 
-#+RESULTS:
-| Autechre | 410c9baf-5469-44f6-9852-826524b80c61 |
+A more interactive approach could start with  =(musicbrainz-search "artist" "Autechre")= or =(musicbrainz-search-artist "Autechre")= Which returns the MBID required for the lookup → =410c9baf-5469-44f6-9852-826524b80c61=
+
+The MBID can be checked if needed,  with =(musicbrainz-mbid-p "410c9baf-5469-44f6-9852-826524b80c61")=
+
+The MBID can then be used for specific lookups…
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-lookup "artist" "410c9baf-5469-44f6-9852-826524b80c61" "releases")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-lookup-artist "410c9baf-5469-44f6-9852-826524b80c61")
+#+END_SRC
+
+| Autechre | electronic music duo | Group | [[https://musicbrainz.org/artist/410c9baf-5469-44f6-9852-826524b80c61][410c9baf-5469-44f6-9852-826524b80c61]] |
+
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-lookup-artist-releases  "410c9baf-5469-44f6-9852-826524b80c61")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-lookup-artist-recordings  "410c9baf-5469-44f6-9852-826524b80c61")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-lookup-release "ec1ecfcc-f529-43d1-8aa6-2c7051ede00c")
+#+END_SRC
+
+| 1990 | Autechre / Saw You | Cassette Case | [[https://musicbrainz.org/release/ec1ecfcc-f529-43d1-8aa6-2c7051ede00c][ec1ecfcc-f529-43d1-8aa6-2c7051ede00c]] |
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-lookup-recording "83730176-89ec-41a5-a4b6-476998f6291c")
+#+END_SRC
+
+| [untitled] | [[https://musicbrainz.org/recording/83730176-89ec-41a5-a4b6-476998f6291c][83730176-89ec-41a5-a4b6-476998f6291c]] |
 
 
 #+BEGIN_SRC emacs-lisp
@@ -85,7 +126,7 @@ John Williams, the classical guitar player, has an artist MBID of 8b8a38a9-a290-
 =7feb02f2-51fa-422d-838e-2c14ecb4c7b8= →  Tomorrows Bad Seeds
 
 #+BEGIN_SRC emacs-lisp
-(musicbrainz-disambiguate-artist "Bad Seeds")
+(musicbrainz-disambiguate-artist "Bad Seeds" 7)
 #+END_SRC
 
 #+RESULTS:
@@ -96,11 +137,15 @@ John Williams, the classical guitar player, has an artist MBID of 8b8a38a9-a290-
 |  98 | The Bad Seeds, backing band for Nick Cave                 | [[https://musicbrainz.org/artist/eb2a8edc-5670-4896-82be-87db38de9583][eb2a8edc-5670-4896-82be-87db38de9583]] |
 |  86 | Nick Cave & the Bad Seeds, nil                            | [[https://musicbrainz.org/artist/172e1f1a-504d-4488-b053-6344ba63e6d0][172e1f1a-504d-4488-b053-6344ba63e6d0]] |
 |  50 | The Lightning Seeds, nil                                  | [[https://musicbrainz.org/artist/1ba601a0-3401-4b28-8ddd-9af8203661e8][1ba601a0-3401-4b28-8ddd-9af8203661e8]] |
+|  49 | Seeds, UK dancehall                                       | [[https://musicbrainz.org/artist/a03cf587-a3d3-4847-ac41-e488f779a313][a03cf587-a3d3-4847-ac41-e488f779a313]] |
 
 
+
+* ListenBrainz
 
 
 [[file:img/listenbrainz-logo.svg]]
+
 * listening
 
 - https://listenbrainz.org
@@ -125,11 +170,11 @@ John Williams, the classical guitar player, has an artist MBID of 8b8a38a9-a290-
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(listenbrainz-submit-single-listen "farmersmanual" "808808008088 (11)")
+(listenbrainz-submit-single-listen "Matthew Thomas" "Taema" "Architecture")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(listenbrainz-submit-single-listen "Matthew Thomas" "Taema" "Architecture")
+(listenbrainz-submit-single-listen "farmersmanual" "808808008088 (11)")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -141,7 +186,7 @@ John Williams, the classical guitar player, has an artist MBID of 8b8a38a9-a290-
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(listenbrainz-stats-artists "zzzkt") ;; defaults to ’all time’
+(listenbrainz-stats-artists "zzzkt")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -246,6 +291,11 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#pinned-recording-api-
 | GET /1/(user_name)/pins           | - |
 
 
+* otherBrainz
+ - [[https://critiquebrainz.org/][CritiqueBrainz]]
+ - [[https://bookbrainz.org/][BookBrainz]] → https://api.test.bookbrainz.org/1/docs/
+ - [[https://listenbrainz.org/messybrainz/][MessyBrainz]]
+ - [[https://coverartarchive.org/][Cover art archive]]
 
 * further
 - https://listenbrainz.org/user/troi-bot/playlists/
