@@ -1,7 +1,7 @@
 # -*- mode: org; coding: utf-8; -*-
 #+OPTIONS: toc:2 num:nil html-style:nil
 #+author:
-#+title:  MusicBrainz & ListenBrainz & other
+#+title:  MusicBrainz & ListenBrainz & others
 
 * MusicBrainz
 
@@ -11,7 +11,7 @@ MusicBrainz is a community-maintained open source encyclopedia of [[https://musi
 
 This code provides a simple, incomplete yet possibly useful interface to some of the MusicBrainz and ListenBrainz APIs from emacs for exploratory  use in =org-mode= or behind the scenes sending listening metadata.
 
-*  MusicBrainz API
+** MusicBrainz API
 
 - Recording documentation: https://musicbrainz.org/doc/Recording
 - Release documentation: https://musicbrainz.org/doc/Release
@@ -54,11 +54,11 @@ The MBID can be used for specific lookups (and checked if needed using =musicbra
 | Autechre | electronic music duo | Group | [[https://musicbrainz.org/artist/410c9baf-5469-44f6-9852-826524b80c61][410c9baf-5469-44f6-9852-826524b80c61]] |
 
 #+BEGIN_SRC emacs-lisp
-(musicbrainz-lookup-artist-releases  "410c9baf-5469-44f6-9852-826524b80c61")
+(musicbrainz-lookup-artist-releases "410c9baf-5469-44f6-9852-826524b80c61")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-(musicbrainz-lookup-artist-recordings  "410c9baf-5469-44f6-9852-826524b80c61")
+(musicbrainz-lookup-artist-recordings "410c9baf-5469-44f6-9852-826524b80c61")
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -92,9 +92,7 @@ The MBID can be used for specific lookups (and checked if needed using =musicbra
 
 ** MBID
 
-“One of MusicBrainz' aims is to be the universal lingua franca for music by providing a reliable and unambiguous form of music identification; this music identification is performed through the use of MusicBrainz Identifiers  (MBIDs). An MBID is a 36 character Universally Unique Identifier that is permanently assigned to each entity in the database, i.e. artists, release groups, releases, recordings, works, labels, areas, places and URLs. MBIDs are also assigned to Tracks, though tracks do not share many other properties of entities.”
-
-https://musicbrainz.org/doc/MusicBrainz_Identifier
+“One of MusicBrainz' aims is to be the universal lingua franca for music by providing a reliable and unambiguous form of music identification; this music identification is performed through the use of MusicBrainz Identifiers  (MBIDs). An MBID is a 36 character Universally Unique Identifier that is permanently assigned to each entity in the database, i.e. artists, release groups, releases, recordings, works, labels, areas, places and URLs. MBIDs are also assigned to Tracks, though tracks do not share many other properties of entities.” https://musicbrainz.org/doc/MusicBrainz_Identifier
 
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-artist-to-mbid "Autechre")
@@ -136,7 +134,6 @@ Which returns the MBID =7feb02f2-51fa-422d-838e-2c14ecb4c7b8= for “Tomorrows B
 (musicbrainz-disambiguate-artist "Bad Seeds" 7)
 #+END_SRC
 
-#+RESULTS:
 |     | Artist: Bad Seeds                                         | MBID                                 |
 | 100 | Tomorrows Bad Seeds, nil                                  | [[https://musicbrainz.org/artist/7feb02f2-51fa-422d-838e-2c14ecb4c7b8][7feb02f2-51fa-422d-838e-2c14ecb4c7b8]] |
 |  98 | The Bad Seeds, 60s Texas rock band                        | [[https://musicbrainz.org/artist/3e593712-9f70-4b7a-b21b-466016998a3d][3e593712-9f70-4b7a-b21b-466016998a3d]] |
@@ -146,6 +143,64 @@ Which returns the MBID =7feb02f2-51fa-422d-838e-2c14ecb4c7b8= for “Tomorrows B
 |  50 | The Lightning Seeds, nil                                  | [[https://musicbrainz.org/artist/1ba601a0-3401-4b28-8ddd-9af8203661e8][1ba601a0-3401-4b28-8ddd-9af8203661e8]] |
 |  49 | Seeds, UK dancehall                                       | [[https://musicbrainz.org/artist/a03cf587-a3d3-4847-ac41-e488f779a313][a03cf587-a3d3-4847-ac41-e488f779a313]] |
 
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-lookup-artist "172e1f1a-504d-4488-b053-6344ba63e6d0")
+#+END_SRC
+
+** incompleteness
+
+general, specific and partial API coverage
+
+*** Searching & browsing
+
+Search supports the full  [[https://lucene.apache.org/core/7_7_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description][Lucene search syntax]] in queries.
+
+| (musicbrainz-search /type/ /query/ &optional /limit/ /offset/) | see =musicbrainz-search-types= |
+| (musicbrainz-browse /entity/ /link/ /query/ &optional /type/)  | and =musicbrainz-entities-*=   |
+
+| (musicbrainz-search-artist /artist/ &optional /limit/)       |   |
+| (musicbrainz-artist-to-mbid /artist/)                      |   |
+| (musicbrainz-disambiguate-artist /artist/ &optional /limit/) |   |
+| (musicbrainz-search-label /label/ &optional /limit/)         |   |
+| (musicbrainz-search-recording /query/ &optional /limit/)     |   |
+| (musicbrainz-search-release /query/ &optional /limit/)       |   |
+
+*** Lookup queries & subqueries
+
+| (musicbrainz-lookup /entity/ /MBID/ &optional /inc/) | valid entities listed in =musicbrainz-entities-core= |
+
+| *Functions & formatted output*                          | example MBID                         |
+| (musicbrainz-lookup-area /MBID/)                        | [[https://musicbrainz.org/area/c9ac1239-e832-41bc-9930-e252a1fd1105][c9ac1239-e832-41bc-9930-e252a1fd1105]] |
+| (musicbrainz-lookup-artist /MBID/)                      | [[https://musicbrainz.org/artist/410c9baf-5469-44f6-9852-826524b80c61][410c9baf-5469-44f6-9852-826524b80c61]] |
+| (musicbrainz-lookup-artist-recordings /MBID/)           | …                                    |
+| (musicbrainz-lookup-artist-releases /MBID/)             | …                                    |
+| (musicbrainz-lookup-artist-release-groups /MBID/)       | …                                    |
+| (musicbrainz-lookup-artist-works /MBID/)                | …                                    |
+| (musicbrainz-lookup-collection /MBID/)                  | …                                    |
+| (musicbrainz-lookup-collection-user-collections /MBID/) | …                                    |
+| (musicbrainz-lookup-event /MBID/)                       | [[https://musicbrainz.org/event/7c132556-e902-4481-b9cb-ec76a175628a][7c132556-e902-4481-b9cb-ec76a175628a]] |
+| (musicbrainz-lookup-genre /MBID/)                       | [[https://musicbrainz.org/genre/68c81274-5770-4e7b-a4bf-ab0d7d425d99][68c81274-5770-4e7b-a4bf-ab0d7d425d99]] |
+| (musicbrainz-lookup-instrument /MBID/)                  | [[https://musicbrainz.org/instrument/303d4f1a-f799-4c42-9bac-dbedd9139e91][303d4f1a-f799-4c42-9bac-dbedd9139e91]] |
+| (musicbrainz-lookup-label /MBID/)                       | [[https://musicbrainz.org/label/8943d408-940c-403b-a01d-9036c227d50f][8943d408-940c-403b-a01d-9036c227d50f]] |
+| (musicbrainz-lookup-label-releases /MBID/)              | …                                    |
+| (musicbrainz-lookup-place /MBID/)                       | [[https://musicbrainz.org/place/73cba8a4-cacb-45b9-8e02-654f716e2e7a][73cba8a4-cacb-45b9-8e02-654f716e2e7a]] |
+| (musicbrainz-lookup-recording /MBID/)                   | [[https://musicbrainz.org/recording/ef8b34c1-8548-472c-872f-03e0d8d3bb37][ef8b34c1-8548-472c-872f-03e0d8d3bb37]] |
+| (musicbrainz-lookup-recording-artists /MBID/)           | …                                    |
+| (musicbrainz-lookup-recording-releases /MBID/)          | …                                    |
+| (musicbrainz-lookup-recording-isrcs /MBID/)             | …                                    |
+| (musicbrainz-lookup-recording-url-rels /MBID/)          | …                                    |
+| (musicbrainz-lookup-release /MBID/)                     | …                                    |
+| (musicbrainz-lookup-release-artists /MBID/)             | …                                    |
+| (musicbrainz-lookup-release-collections /MBID/)         | …                                    |
+| (musicbrainz-lookup-release-labels /MBID/)              | …                                    |
+| (musicbrainz-lookup-release-recordings /MBID/)          | …                                    |
+| (musicbrainz-lookup-release-release-groups /MBID/)      | …                                    |
+| (musicbrainz-lookup-release-group /MBID/)               | [[https://musicbrainz.org/release-group/fe4acfe9-6d1e-3565-8857-fb16ddc492ab][fe4acfe9-6d1e-3565-8857-fb16ddc492ab]] |
+| (musicbrainz-lookup-release-group-artists /MBID/)       | …                                    |
+| (musicbrainz-lookup-release-group-releases /MBID/)      | …                                    |
+| (musicbrainz-lookup-series /MBID/)                      | …                                    |
+| (musicbrainz-lookup-work /MBID/)                        | …                                    |
+| (musicbrainz-lookup-url /MBID/)                         | …                                    |
 
 
 * ListenBrainz
@@ -153,12 +208,12 @@ Which returns the MBID =7feb02f2-51fa-422d-838e-2c14ecb4c7b8= for “Tomorrows B
 
 [[file:img/listenbrainz-logo.svg]]
 
-* listening
+** listening
 
 - https://listenbrainz.org
 - https://listenbrainz.readthedocs.io/
 
-* examples
+** examples
 
 #+BEGIN_SRC emacs-lisp
 (setq listenbrainz-api-token "000-000-000")
@@ -204,9 +259,8 @@ Which returns the MBID =7feb02f2-51fa-422d-838e-2c14ecb4c7b8= for “Tomorrows B
 (listenbrainz-stats-recordings "zzzkt" 13 "month")
 #+END_SRC
 
-* incompleteness
-
-** Core API endpoints
+** incompleteness
+*** Core API endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#core-api-endpoints
 
@@ -227,7 +281,7 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#core-api-endpoints
 | GET /1/latest-import                                    | -                                 |
 | POST /1/latest-import                                   | -                                 |
 
-** Feedback API Endpoints
+*** Feedback API Endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#feedback-api-endpoints
 
@@ -236,13 +290,13 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#feedback-api-endpoint
 | GET /1/feedback/user/(user_name)/get-feedback-for-recordings | – |
 | GET /1/feedback/user/(user_name)/get-feedback                | - |
 
-** Recording Recommendation API Endpoints
+*** Recording Recommendation API Endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#core-api-endpoints
 
 | GET /1/cf/recommendation/user/(user_name)/recording        | - |
 
-** Recording Recommendation Feedback API Endpoints
+*** Recording Recommendation Feedback API Endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#recording-recommendation-feedback-api-endpoints
 
@@ -251,7 +305,7 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#recording-recommendat
 | GET /1/recommendation/feedback/user/(user_name)/recordings | - |
 | GET /1/recommendation/feedback/user/(user_name)            | - |
 
-** Statistics API Endpoints
+*** Statistics API Endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#statistics-api-endpoints
 
@@ -263,13 +317,13 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#statistics-api-endpoi
 | GET /1/stats/user/(user_name)/releases           | listenbrainz-stats-releases   |
 | GET /1/stats/user/(user_name)/artists            | listenbrainz-stats-artists    |
 
-** Status API Endpoints
+*** Status API Endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#status-api-endpoints
 
 | GET /1/status/get-dump-info | - |
 
-** User Timeline API Endpoints
+*** User Timeline API Endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#user-timeline-api-endpoints
 
@@ -278,7 +332,7 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#user-timeline-api-end
 | POST /1/user/(user_name)/feed/events/delete                 | - |
 | GET /1/user/(user_name)/feed/events                         | - |
 
-** Social API Endpoints
+*** Social API Endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#social-api-endpoints
 
@@ -287,7 +341,7 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#social-api-endpoints
 | POST /1/user/(user_name)/unfollow | -                      |
 | POST /1/user/(user_name)/follow   | -                      |
 
-** Pinned Recording API Endpoints
+*** Pinned Recording API Endpoints
 
 https://listenbrainz.readthedocs.io/en/production/dev/api/#pinned-recording-api-endpoints
 
@@ -305,5 +359,7 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#pinned-recording-api-
  - [[https://coverartarchive.org/][Cover art archive]]
 
 * further
+- https://labs.api.listenbrainz.org/
+- https://troi.readthedocs.io/en/latest/
 - https://listenbrainz.org/user/troi-bot/playlists/
 - https://github.com/metabrainz/bono-data-sets/blob/main/top_discoveries.py
