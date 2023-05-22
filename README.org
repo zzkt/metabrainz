@@ -164,6 +164,7 @@ Search supports the full  [[https://lucene.apache.org/core/7_7_2/queryparser/org
 | (musicbrainz-search-label /label/ &optional /limit/)         |   |
 | (musicbrainz-search-recording /query/ &optional /limit/)     |   |
 | (musicbrainz-search-release /query/ &optional /limit/)       |   |
+| (musicbrainz-search-work /query/ &optional /limit/)   |   |
 
 *** Lookup queries & subqueries
 
@@ -199,7 +200,7 @@ Search supports the full  [[https://lucene.apache.org/core/7_7_2/queryparser/org
 | (musicbrainz-lookup-release-group-artists /MBID/)       | …                                    |
 | (musicbrainz-lookup-release-group-releases /MBID/)      | …                                    |
 | (musicbrainz-lookup-series /MBID/)                      | …                                    |
-| (musicbrainz-lookup-work /MBID/)                        | …                                    |
+| (musicbrainz-lookup-work /MBID/)                        | [[https://musicbrainz.org/work/4ee2545d-2be5-3841-b568-0b4554eccc67][4ee2545d-2be5-3841-b568-0b4554eccc67]] |
 | (musicbrainz-lookup-url /MBID/)                         | …                                    |
 
 

@@ -27,21 +27,22 @@
 
 ;;; Commentary:
 
-;; - basic MusicBrainz interface
-;; - partial & incomplete
-;; - no error checks
-;; - sync -> async
-
+;; An interface to the MusicBrainz "open music encyclopedia" collection
+;; of music metadata. The main entry points are `musicbrainz-search' for
+;; general searches and `musicbrainz-lookup' for the more specific.
+;; There are also some narrower searches such as `musicbrainz-search-artist'
+;;
+;; Naming follows the MusicBrainz API reasonably closely, so the official API
+;; documentation can provide insight into how searching, browsing and lookups
+;; are structured. MusicBrainz has it's particular taxonomy and quirks, so
+;; some familiarity may be required to get useful results in some cases.
+;;
+;; https://musicbrainz.org/doc/MusicBrainz_API
 
 ;;; Code:
 
 (require 'request)
 (require 'json)
-
-;; debug level for http requests
-(setq request-log-level 'warn
-      request-message-level 'warn)
-
 
 ;;; ;; ;; ;  ; ;   ;  ;      ;
 ;;
@@ -113,6 +114,12 @@ As seen in https://wiki.musicbrainz.org/MusicBrainz_API/Rate_Limiting"
         "series" "tag" "work" "url")
   "Valid TYPE parameters for MusicBrainz searches.")
 
+(defconst musicbrainz-relationships
+  (list "area-rels" "artist-rels" "event-rels" "instrument-rels"
+        "label-rels" "place-rels" "recording-rels" "release-rels"
+        "release-group-rels" "series-rels" "url-rels" "work-rels")
+  "Valid relationships for lookups.")
+
 
 ;; entity checks
 
@@ -175,6 +182,10 @@ An MBID is a 36 character Universally Unique Identifier, see https://musicbrainz
             mbid))
       t nil))
 
+;; https://lucene.apache.org/core/4_3_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#Escaping_Special_Characters
+(defconst musicbrainz-qeury-special-chars
+  (list "+" "-" "&" "|" "!" "(" ")" "{" "}"  "[" "]" "^" "\"" "~" "*" "?" ":" "\\" "/"))
+
 
 (defun musicbrainz-format (response)
   "Format a generic RESPONSE."
@@ -228,6 +239,7 @@ can be found near https://musicbrainz.org/doc/MusicBrainz_API/Search
 or in the Lucene docs."
 
   (message "MusicBrainz: searching %s=%s" type query)
+  ;; queries may need to be escaped
   (let* ((max (if limit limit 1))
          (from (if offset offset ""))
          (response
@@ -264,11 +276,58 @@ Heuristics.
         (message "searching mbid: %s" mbid))
       ;; search (search/browse/query) for other things
       (progn
-        (message "searching other: %s" mbid)
-        )))
+        (message "searching other: %s" mbid))))
 
+
+;; generate search functions
+
+(defmacro musicbrainz--defsearch-1 (name format-string format-args)
+  "Generate search function to format a single item.
+NAME FORMAT-STRING FORMAT-ARGS
+See listenbrainz--deformatter for details."
+  (let ((f (intern (concat "musicbrainz-search-" name)))
+        (doc (format "Search for %s using QUERY and show matches.
+Optionally return LIMIT number of results." name)))
+    `(defun ,f (query &optional limit) ,doc
+       (let* ((max (if limit limit 1))
+              (response
+               (musicbrainz-search ,name query max)))
+         (let-alist response
+                    (format ,format-string ,@format-args))))))
+
+
+(defmacro musicbrainz--defsearch-2 (name format-string format-args alist)
+  "Generate lookup function to format multiple items.
+QUERY SUBQUERY FORMAT-STRING FORMAT-ARGS ALIST
+See listenbrainz--deformatter for details."
+  (let ((f (intern (concat "musicbrainz-search-" name)))
+        (doc (format "Search for %s using QUERY and show matches.
+Optionally return LIMIT number of results." name)))
+    `(defun ,f (query &optional limit) ,doc
+       (let* ((max (if limit limit 1))
+              (response
+                (musicbrainz-search ,name query max)))
+         (let-alist response
+                    (seq-map
+                     (lambda (i)
+                       (let-alist i
+                                  (format ,format-string ,@format-args)))
+                     ,alist))))))
 
 ;; various specific searches
+
+;; search ->  musicbrainz-search-annotation
+(musicbrainz--defsearch-2 "annotation"
+                          "%s | %s |  %s | %s | [[https://musicbrainz.org/%s/%s][%s]] |\n"
+                          (.score .type .name .text .type .entity .entity)
+                          .annotations)
+
+;; search ->  musicbrainz-search-area
+(musicbrainz--defsearch-2 "area"
+                          "%s | [[https://musicbrainz.org/area/%s][%s]] |\n"
+                          (.name .id .id)
+                          .areas)
+
 
 (defun musicbrainz-search-artist (artist &optional limit)
   "Search for an ARTIST and show matches.
@@ -314,6 +373,19 @@ Outputs an `org-mode' table with descriptions and MBID link to artists pages."
                       .artists)))))
 
 
+;; search ->  musicbrainz-search-event
+(musicbrainz--defsearch-2 "event"
+                          "%s | [[https://musicbrainz.org/event/%s][%s]] |\n"
+                          (.name .id .id)
+                          .events)
+
+;; search ->  musicbrainz-search-instrument
+(musicbrainz--defsearch-2 "instrument"
+                          "| %s | %s | [[https://musicbrainz.org/instrument/%s][%s]] |\n"
+                          (.name .type  .id .id)
+                          .instruments)
+
+
 (defun musicbrainz-search-label (label &optional limit)
   "Search for a LABEL and show matches.
 Optionally return LIMIT number of results."
@@ -337,32 +409,47 @@ Optionally return LIMIT number of results."
       .labels))))
 
 
-(defun musicbrainz-search-recording (query &optional limit)
-  "Search for a recording using QUERY and show matches.
-Optionally return LIMIT number of results."
-  (let ((data (musicbrainz-search "recording" query limit)))
-    (let-alist
-     data
-     (seq-map
-      (lambda (i)
-        (let-alist i
-                   (format "%s | %s, %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
-                           .score .title (musicbrainz--unwrap-0 .artist-credit) .id .id)))
-      .recordings))))
+;; search ->  musicbrainz-search-place
+(musicbrainz--defsearch-2 "place"
+                          "%s | [[https://musicbrainz.org/place/%s][%s]] |\n"
+                          (.name .id .id)
+                          .places)
 
+;; search ->  musicbrainz-search-recording
+(musicbrainz--defsearch-2 "recording"
+                          "%s | %s, %s | [[https://musicbrainz.org/recording/%s][%s]] |\n"
+                          (.score .title (musicbrainz--unwrap-0 .artist-credit) .id .id)
+                          .recordings)
 
-(defun musicbrainz-search-release (query &optional limit)
-  "Search for a release using QUERY and show matches.
-Optionally return LIMIT number of results."
-  (let ((data (musicbrainz-search "release" query limit)))
-    (let-alist
-     data
-     (seq-map
-      (lambda (i)
-        (let-alist i
-                   (format "%s | %s, %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
-                           .score .title (musicbrainz--unwrap-0 .artist-credit) .id .id)))
-      .releases))))
+;; search ->  musicbrainz-search-release
+(musicbrainz--defsearch-2 "release"
+                          "%s | %s | %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
+                          (.score .title (musicbrainz--unwrap-0 .artist-credit) .id .id)
+                          .releases)
+
+;; search ->  musicbrainz-search-release-group
+(musicbrainz--defsearch-2 "release-group"
+                          "%s | %s | %s | [[https://musicbrainz.org/release-group/%s][%s]] |\n"
+                          (.first-release-date .title .primary-type .id .id)
+                          .release-groups)
+
+;; search ->  musicbrainz-search-series
+(musicbrainz--defsearch-2 "series"
+                          "%s | [[https://musicbrainz.org/series/%s][%s]] |\n"
+                          (.name .id .id)
+                          .series)
+
+;; search ->  musicbrainz-search-work
+(musicbrainz--defsearch-2 "work"
+                          "%s | %s | [[https://musicbrainz.org/work/%s][%s]] |\n"
+                          (.score .title .id .id)
+                          .works)
+
+;; search ->  musicbrainz-search-url
+(musicbrainz--defsearch-2 "url"
+                          "%s | [[%s][%s]] | [[https://musicbrainz.org/url/%s][%s]] |\n"
+                          (.score .resource .resource .id .id)
+                          .urls)
 
 
 ;;; ;; ;; ;  ; ;   ;  ;      ;
@@ -412,6 +499,13 @@ Subqueries
         response)
       (error "MusicBrainz: search requires a valid MBID and entity (i.e. one of %s)"
              musicbrainz-entities-core)))
+
+;; relationship lookups
+
+(defun musicbrainz-relations (entity relation mbid)
+  "Lookup relationships of type RELATION to ENTITY with MBID."
+  ;; no sanity and/or error checks
+  (musicbrainz-lookup entity mbid (format "%s-rels" relation)))
 
 
 ;; specific MBID lookup requests & subrequests (limited to 25 results?)
@@ -470,12 +564,12 @@ See listenbrainz--deformatter for details."
 
 ;; lookup ->  musicbrainz-lookup-area
 (musicbrainz--deflookup-1 "area"
-                           "| %s | [[https://musicbrainz.org/area/%s][%s]] |\n"
+                          "| %s | [[https://musicbrainz.org/area/%s][%s]] |\n"
                           (.name .id .id))
 
 ;; lookup ->  musicbrainz-lookup-artist
 (musicbrainz--deflookup-1 "artist"
-                           "| %s | %s | %s | [[https://musicbrainz.org/artist/%s][%s]] |\n"
+                          "| %s | %s | %s | [[https://musicbrainz.org/artist/%s][%s]] |\n"
                           (.name .disambiguation .type .id .id))
 
 ;; lookup ->  musicbrainz-lookup-artist-recordings
@@ -486,19 +580,19 @@ See listenbrainz--deformatter for details."
 
 ;; lookup ->  musicbrainz-lookup-artist-releases
 (musicbrainz--deflookup-2 "artist" "releases"
-                           "%s | %s | %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
+                          "%s | %s | %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
                           (.date .title .packaging .id .id)
                           .releases)
 
 ;; lookup ->  musicbrainz-lookup-artist-release-groups
 (musicbrainz--deflookup-2 "artist" "release-groups"
-                           "%s | %s | %s | [[https://musicbrainz.org/release-group/%s][%s]] |\n"
+                          "%s | %s | %s | [[https://musicbrainz.org/release-group/%s][%s]] |\n"
                           (.first-release-date .title .primary-type .id .id)
                           .release-groups)
 
 ;; lookup ->  musicbrainz-lookup-artist-works
 (musicbrainz--deflookup-2 "artist" "works"
-                           " %s | [[https://musicbrainz.org/work/%s][%s]] |\n"
+                          " %s | [[https://musicbrainz.org/work/%s][%s]] |\n"
                           (.title .id .id)
                           .works)
 
@@ -509,69 +603,69 @@ See listenbrainz--deformatter for details."
 
 ;; lookup ->  musicbrainz-lookup-collection-user-collections (requires authentication)
 (musicbrainz--deflookup-2 "collection" "user-collections"
-                           " %s | [[https://musicbrainz.org/collection/%s][%s]] |\n"
+                          " %s | [[https://musicbrainz.org/collection/%s][%s]] |\n"
                           (.name .id .id)
                           .collection)
 
 ;; lookup ->  musicbrainz-lookup-event
 (musicbrainz--deflookup-1 "event"
-                           "| %s | [[https://musicbrainz.org/event/%s][%s]] |\n"
+                          "| %s | [[https://musicbrainz.org/event/%s][%s]] |\n"
                           (.name .id .id))
 
 ;; lookup ->  musicbrainz-lookup-genre
 (musicbrainz--deflookup-1 "genre"
-                           "| %s | [[https://musicbrainz.org/genre/%s][%s]] |\n"
+                          "| %s | [[https://musicbrainz.org/genre/%s][%s]] |\n"
                           (.name .id .id))
 
 ;; lookup ->  musicbrainz-lookup-instrument
 (musicbrainz--deflookup-1 "instrument"
-                           "| %s | %s | [[https://musicbrainz.org/instrument/%s][%s]] |\n"
+                          "| %s | %s | [[https://musicbrainz.org/instrument/%s][%s]] |\n"
                           (.name .type  .id .id))
 
 ;; lookup ->  musicbrainz-lookup-label
 (musicbrainz--deflookup-1 "label"
-                           "| %s | %s | [[https://musicbrainz.org/label/%s][%s]] |\n"
+                          "| %s | %s | [[https://musicbrainz.org/label/%s][%s]] |\n"
                           (.name .disambiguation .id .id))
 
 
 ;; lookup ->  musicbrainz-lookup-label-releases
 (musicbrainz--deflookup-2 "label" "releases"
-                           "%s | %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
+                          "%s | %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
                           (.date .title .id .id)
                           .releases)
 
 ;; lookup ->  musicbrainz-lookup-place
 (musicbrainz--deflookup-1 "place"
-                           "| %s | [[https://musicbrainz.org/place/%s][%s]] |\n"
+                          "| %s | [[https://musicbrainz.org/place/%s][%s]] |\n"
                           (.name .id .id))
 
 ;; lookup ->  musicbrainz-lookup-recording
 (musicbrainz--deflookup-1 "recording"
-                           "| %s | %s | [[https://musicbrainz.org/recording/%s][%s]] |\n"
+                          "| %s | %s | [[https://musicbrainz.org/recording/%s][%s]] |\n"
                           (.first-release-date .title .id .id))
 
 
 ;; lookup ->  musicbrainz-lookup-recording-artists
 (musicbrainz--deflookup-2 "recording" "artists"
-                           "%s | [[https://musicbrainz.org/artist/%s][%s]] |\n"
+                          "%s | [[https://musicbrainz.org/artist/%s][%s]] |\n"
                           (.artist.name .artist.id .artist.id)
                           .artist-credit)
 
 ;; lookup ->  musicbrainz-lookup-recording-releases
 (musicbrainz--deflookup-2 "recording" "releases"
-                           "%s | %s |  %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
+                          "%s | %s |  %s | [[https://musicbrainz.org/release/%s][%s]] |\n"
                           (.date .title .packaging .id .id)
                           .releases)
 
 ;; lookup ->  musicbrainz-lookup-recording-isrcs
 (musicbrainz--deflookup-2 "recording" "isrcs"
-                           "%s | [[https://musicbrainz.org/isrc/%s][%s]] |\n"
+                          "%s | [[https://musicbrainz.org/isrc/%s][%s]] |\n"
                           (.name .id .id)
                           .isrcs)
 
 ;; lookup ->  musicbrainz-lookup-recording-url-rels
 (musicbrainz--deflookup-2 "recording" "url-rels"
-                           "%s | [[https://musicbrainz.org/recording/%s][%s]] |\n"
+                          "%s | [[https://musicbrainz.org/recording/%s][%s]] |\n"
                           (.name .id .id)
                           .relations)
 
@@ -596,7 +690,7 @@ See listenbrainz--deformatter for details."
 
 ;; lookup ->  musicbrainz-lookup-release-group
 (musicbrainz--deflookup-1 "release-group"
-                           "| %s | %s | %s | [[https://musicbrainz.org/release-group/%s][%s]] |\n"
+                          "| %s | %s | %s | [[https://musicbrainz.org/release-group/%s][%s]] |\n"
                           (.first-release-date .title .primary-type .id .id))
 
 ;; lookup ->  musicbrainz-lookup-release-group-artists
@@ -609,17 +703,17 @@ See listenbrainz--deformatter for details."
 
 ;; lookup ->  musicbrainz-lookup-series
 (musicbrainz--deflookup-1 "series"
-                           "| %s | [[https://musicbrainz.org/series/%s][%s]] |\n"
-                          (.name .id .id))
+                          "| %s | [[https://musicbrainz.org/series/%s][%s]] |\n"
+                          (.title .id .id))
 
 ;; lookup ->  musicbrainz-lookup-work
 (musicbrainz--deflookup-1 "work"
-                           "| %s | [[https://musicbrainz.org/work/%s][%s]] |\n"
-                          (.name .id .id))
+                          "| %s | [[https://musicbrainz.org/work/%s][%s]] |\n"
+                          (.title .id .id))
 
 ;; lookup ->  musicbrainz-lookup-url
 (musicbrainz--deflookup-1 "url"
-                           "| %s | [[https://musicbrainz.org/url/%s][%s]] |\n"
+                          "| %s | [[https://musicbrainz.org/url/%s][%s]] |\n"
                           (.name .id .id))
 
 
@@ -672,7 +766,6 @@ Optionally limit the search to TYPE results for ENTITY."
     response))
 
 
-;;;
 
 (provide 'musicbrainz)
 
