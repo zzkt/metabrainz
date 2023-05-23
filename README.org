@@ -3,6 +3,21 @@
 #+author:
 #+title:  MusicBrainz & ListenBrainz & others
 
+
+- [[#musicbrainz][MusicBrainz]]
+    - [[#musicbrainz-api][MusicBrainz API]]
+    - [[#searching--browsing][searching & browsing]]
+    - [[#some-examples][some examples]]
+    - [[#mbid][MBID]]
+    - [[#ambiguity][ambiguity]]
+    - [[#incompleteness][incompleteness]]
+- [[#listenbrainz][ListenBrainz]]
+    - [[#listening][listening]]
+    - [[#examples][examples]]
+    - [[#incompleteness-1][incompleteness]]
+- [[#otherbrainz][otherBrainz]]
+- [[#further][further]]
+
 * MusicBrainz
 
 [[file:img/musicbrainz-logo.svg]]
