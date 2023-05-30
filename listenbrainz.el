@@ -262,7 +262,8 @@ macroexpands to something like ->
              :sync t
              :success (cl-function
                        (lambda (&key data &allow-other-keys)
-                         (message "Listens for user: %s" username)))))))
+                         (message "Listens for user: %s\n%s" username
+                                  (if data data ""))))))))
     (princ (listenbrainz--format-listens response))))
 
 
@@ -279,7 +280,8 @@ macroexpands to something like ->
              :sync t
              :success (cl-function
                        (lambda (&key data &allow-other-keys)
-                         (message "User playing now: %s" username)))))))
+                         (message "User playing now: %s\n%s" username
+                                  (if data data ""))))))))
     (princ (listenbrainz--format-playing response))))
 
 
@@ -358,7 +360,8 @@ possible values are week, month, year, all_time, defaults to all_time."
              :sync t
              :success (cl-function
                        (lambda (&key data &allow-other-keys)
-                         (message "Top recordings for user: %s" username)))))))
+                         (message "Top recordings for user: %s\n%s" username
+                                  (if data data ""))))))))
     (princ (listenbrainz--format-stats-2 response))))
 
 
@@ -381,7 +384,8 @@ possible values are week, month, year, all_time, defaults to all_time."
              :sync t
              :success (cl-function
                        (lambda (&key data &allow-other-keys)
-                         (message "Top releases for user: %s" username)))))))
+                         (message "Top releases for user: %s\n%s" username
+                                  (if data data ""))))))))
     (princ (listenbrainz--format-stats-0 response))))
 
 
@@ -404,7 +408,8 @@ possible values are week, month, year, all_time, defaults to all_time."
              :sync t
              :success (cl-function
                        (lambda (&key data &allow-other-keys)
-                         (message "Top artists for user: %s" username)))))))
+                         (message "Top artists for user: %s\n%s" username
+                                  (if data data ""))))))))
     (princ (listenbrainz--format-stats-1 response))))
 
 
@@ -430,10 +435,11 @@ OUTPUT format can be either `list' (default) or `graph'."
              :sync t
              :success (cl-function
                        (lambda (&key data &allow-other-keys)
-                         (message "Followers for %s" username)))))))
+                         (message "Followers for %s\n%s" username
+                                  (if data data ""))))))))
     (if (string= "graph" output)
-         (princ (listenbrainz--format-followers-graph response))
-         (princ (listenbrainz--format-followers-list response)))))
+        (princ (listenbrainz--format-followers-graph response))
+        (princ (listenbrainz--format-followers-list response)))))
 
 ;;;###autoload
 (defun listenbrainz-following (username)
@@ -448,7 +454,8 @@ OUTPUT format can be either `list' (default) or `graph'."
              :sync t
              :success (cl-function
                        (lambda (&key data &allow-other-keys)
-                         (message "Users %s is following" username)))))))
+                         (message "Users %s is following\n%s" username
+                                  (if data data ""))))))))
     (princ (listenbrainz--format-following response))))
 
 

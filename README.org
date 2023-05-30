@@ -3,11 +3,12 @@
 #+author:
 #+title:  MusicBrainz & ListenBrainz & others
 
-
+* Thus                                                             :TOC_2_gh:
 - [[#musicbrainz][MusicBrainz]]
     - [[#musicbrainz-api][MusicBrainz API]]
     - [[#searching--browsing][searching & browsing]]
     - [[#some-examples][some examples]]
+    - [[#cover-art][cover art]]
     - [[#mbid][MBID]]
     - [[#ambiguity][ambiguity]]
     - [[#incompleteness][incompleteness]]
@@ -104,6 +105,25 @@ The MBID can be used for specific lookups (and checked if needed using =musicbra
 |  91 | Universal Music | plain logo: “Universal Music” (ongoing)                                                               | [[https://musicbrainz.org/label/13a464dc-b9fd-4d16-a4f4-d4316f6a46c7][13a464dc-b9fd-4d16-a4f4-d4316f6a46c7]] |
 |  90 | ZYX Music       | (1992 ongoing)                                                                                        | [[https://musicbrainz.org/label/6844efda-a451-431e-8cc1-48ab111b4711][6844efda-a451-431e-8cc1-48ab111b4711]] |
 
+** cover art
+
+Cover art for a release may be available from the [[http://coverartarchive.org/][Cover Art Archive]] and can be accessed via the [[https://musicbrainz.org/doc/Cover_Art_Archive/API][API]]
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-coverart "a929130a-535c-4827-8663-f048e1a7ca0d")
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-coverart-front "a929130a-535c-4827-8663-f048e1a7ca0d")
+#+END_SRC
+
+
+#+BEGIN_SRC emacs-lisp
+(musicbrainz-lookup-release "a929130a-535c-4827-8663-f048e1a7ca0d")
+#+END_SRC
+
+ | Head Cleaning Cassette | Cassette Case | [[https://musicbrainz.org/release/a929130a-535c-4827-8663-f048e1a7ca0d][a929130a-535c-4827-8663-f048e1a7ca0d]] |
 
 ** MBID
 
@@ -118,6 +138,7 @@ returns =410c9baf-5469-44f6-9852-826524b80c61=
 #+BEGIN_SRC emacs-lisp
 (musicbrainz-mbid-p "410c9baf-5469-44f6-9852-826524b80c61")
 #+END_SRC
+
 
 ** ambiguity
 

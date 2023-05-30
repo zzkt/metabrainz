@@ -43,6 +43,7 @@
 
 (require 'request)
 (require 'json)
+(require 'pp)
 
 ;;; ;; ;; ;  ; ;   ;  ;      ;
 ;;
@@ -51,8 +52,14 @@
 ;;; ; ;; ;;
 
 (defcustom musicbrainz-api-url "https://musicbrainz.org/ws/2"
-  "URL for musicbrainz API.
+  "URL for MusicBrainz API.
 Documentation available at https://musicbrainz.org/doc/MusicBrainz_API"
+  :type 'string
+  :group 'musicbrainz)
+
+(defcustom musicbrainz-coverart-api-url "http://coverartarchive.org"
+  "URL for MusicBrainz Cover Art Archive API.
+Documentation available at https://musicbrainz.org/doc/Cover_Art_Archive/API"
   :type 'string
   :group 'musicbrainz)
 
@@ -238,6 +245,7 @@ The QUERY field supports the full Lucene Search syntax, some details
 can be found near https://musicbrainz.org/doc/MusicBrainz_API/Search
 or in the Lucene docs."
 
+  (interactive "sMusicBrainz search type: \nsMusicBrainz search query: ")
   (message "MusicBrainz: searching %s=%s" type query)
   ;; queries may need to be escaped
   (let* ((max (if limit limit 1))
@@ -252,10 +260,13 @@ or in the Lucene docs."
              :headers (list `("User-Agent" . ,musicbrainz-user-agent))
              :parser 'json-read
              :sync t
-             :success (cl-function
-                       (lambda (&key data &allow-other-keys)
-                         (message "ok")))))))
-    response))
+             :sucess (cl-function
+                      (lambda (&key data &allow-other-keys)
+                        (message "ok: %s" data)))
+             ))))
+    (if (called-interactively-p 'any)
+        (message "%s" (pp response))
+        response)))
 
 
 ;;;###autoload
@@ -269,14 +280,14 @@ Heuristics.
 - if QUERY is an MBID, check artist, recording, etc
 - if QUERY is text, search for artists or recordings, etc"
 
-  (message "MusicBrainz: query %s" query)
+  (message "MusicBrainz: query %s %s" query (if extras extras ""))
   (if (musicbrainz-mbid-p query)
       ;; search (lookup) for things that could have an mbid
       (let ((mbid query))
-        (message "searching mbid: %s" mbid))
-      ;; search (search/browse/query) for other things
-      (progn
-        (message "searching other: %s" mbid))))
+        (message "searching mbid: %s" mbid)
+        ;; search (search/browse/query) for other things
+        (progn
+          (message "searching other: %s" mbid)))))
 
 
 ;; generate search functions
@@ -291,14 +302,14 @@ Optionally return LIMIT number of results." name)))
     `(defun ,f (query &optional limit) ,doc
        (let* ((max (if limit limit 1))
               (response
-               (musicbrainz-search ,name query max)))
+                (musicbrainz-search ,name query max)))
          (let-alist response
                     (format ,format-string ,@format-args))))))
 
 
 (defmacro musicbrainz--defsearch-2 (name format-string format-args alist)
   "Generate lookup function to format multiple items.
-QUERY SUBQUERY FORMAT-STRING FORMAT-ARGS ALIST
+NAME FORMAT-STRING FORMAT-ARGS ALIST
 See listenbrainz--deformatter for details."
   (let ((f (intern (concat "musicbrainz-search-" name)))
         (doc (format "Search for %s using QUERY and show matches.
@@ -480,6 +491,7 @@ Subqueries
  /ws/2/work
  /ws/2/url"
 
+  (interactive "sMusicBrainz entity type: \nsMusicBrainz MBID for entity: ")
   (message "MusicBrainz: lookup: %s/%s" entity mbid)
   (if (and (musicbrainz-core-entity-p entity)
            (musicbrainz-mbid-p mbid))
@@ -495,10 +507,13 @@ Subqueries
                  :sync t
                  :success (cl-function
                            (lambda (&key data &allow-other-keys)
-                             (message "%s data: %s" entity mbid)))))))
-        response)
-      (error "MusicBrainz: search requires a valid MBID and entity (i.e. one of %s)"
-             musicbrainz-entities-core)))
+                             (when data
+                               (message "%s data: %s" entity mbid))))))))
+        (if (called-interactively-p 'any)
+            (message "%s" (pp response))
+            response))
+      (user-error "MusicBrainz: search requires a valid MBID and entity (i.e. one of %s)"
+                  musicbrainz-entities-core)))
 
 ;; relationship lookups
 
@@ -515,8 +530,10 @@ Subqueries
 NAME FORMAT-STRING FORMAT-ARGS
 See listenbrainz--deformatter for details."
   (let ((f (intern (concat "musicbrainz-lookup-" name)))
-        (doc "MusicBrainz lookup."))
+        (doc "MusicBrainz lookup.")
+        (prompt (format "sMusicBrainz lookup %s by MBID: " name)))
     `(defun ,f (mbid) ,doc
+       (interactive ,prompt)
        (let ((response
                (musicbrainz-lookup ,name mbid)))
          (let-alist response
@@ -528,8 +545,10 @@ See listenbrainz--deformatter for details."
 QUERY SUBQUERY FORMAT-STRING FORMAT-ARGS ALIST
 See listenbrainz--deformatter for details."
   (let ((f (intern (format "musicbrainz-lookup-%s-%s" query subquery)))
-        (doc "MusicBrainz lookup."))
+        (doc "MusicBrainz lookup.")
+        (prompt (format "sMusicBrainz lookup %s %s by MBID: " query subquery)))
     `(defun ,f (mbid) ,doc
+       (interactive ,prompt)
        (let ((response
                (musicbrainz-lookup ,query mbid ,subquery)))
          (let-alist response
@@ -765,6 +784,77 @@ Optionally limit the search to TYPE results for ENTITY."
                         (message "ok")))))))
     response))
 
+
+
+;;;;;; ; ; ;; ;   ;     ;  ; ; ;;   ;
+;;
+;; Cover Art Archive API
+;;  https://musicbrainz.org/doc/Cover_Art_Archive/API
+;;
+;;;; ; ; ; ; ;
+
+;; /release/{mbid}/
+;; /release/{mbid}/front
+;; /release/{mbid}/back
+;; /release/{mbid}/{id}
+;; /release/{mbid}/({id}|front|back)-(250|500|1200)
+;;
+;; /release-group/{mbid}/
+;; /release-group/{mbid}/front[-(250|500|1200)]
+
+;;;###autoload
+(defun musicbrainz-coverart (mbid &optional release-group)
+  "Search MusicBrainz Cover Art Archive for release MBID.
+When RELEASE-GROUP is non-nil MBID is for a release group, rather than release."
+  (message "MusicBrainz: cover art for %s" mbid)
+  (message "url: %s/release/%s" musicbrainz-coverart-api-url mbid)
+  (let ((response
+          (request-response-data
+           (request
+            (url-encode-url
+             (format "%s/release/%s" musicbrainz-coverart-api-url mbid))
+            :type "GET"
+            :header (list `("User-Agent" . ,musicbrainz-user-agent))
+            :parser 'json-read
+            :sync t
+            :success (cl-function
+                      (lambda (&key data &allow-other-keys)
+                        (message "ok")))))))
+    response))
+
+(defun musicbrainz-coverart-file-front (mbid)
+  "Get the MusicBrainz Cover Art front cover file for MBID."
+  (message "MusicBrainz: cover art (front) for %s" mbid)
+  (message "url: %s/release/%s/front" musicbrainz-coverart-api-url mbid)
+  (let ((response
+          (request-response-data
+           (request
+            (url-encode-url
+             (format "%s/release/%s/front" musicbrainz-coverart-api-url mbid))
+            :type "GET"
+            :header (list `("User-Agent" . ,musicbrainz-user-agent))
+            :sync t
+            :success (cl-function
+                      (lambda (&key data &allow-other-keys)
+                        (message "ok")))))))
+    response))
+
+(defun musicbrainz-coverart-file-back (mbid)
+  "Get the MusicBrainz Cover Art back cover file for MBID."
+  (message "MusicBrainz: cover art (back) for %s" mbid)
+  (message "url: %s/release/%s/back" musicbrainz-coverart-api-url mbid)
+  (let ((response
+          (request-response-data
+           (request
+            (url-encode-url
+             (format "%s/release/%s/back" musicbrainz-coverart-api-url mbid))
+            :type "GET"
+            :header (list `("User-Agent" . ,musicbrainz-user-agent))
+            :sync t
+            :success (cl-function
+                      (lambda (&key data &allow-other-keys)
+                        (message "ok")))))))
+    response))
 
 
 (provide 'musicbrainz)
