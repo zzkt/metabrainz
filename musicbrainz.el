@@ -262,8 +262,7 @@ or in the Lucene docs."
              :sync t
              :sucess (cl-function
                       (lambda (&key data &allow-other-keys)
-                        (message "ok: %s" data)))
-             ))))
+                        (message "ok: %s" data)))))))
     (if (called-interactively-p 'any)
         (message "%s" (pp response))
         response)))
@@ -781,7 +780,7 @@ Optionally limit the search to TYPE results for ENTITY."
             :sync t
             :success (cl-function
                       (lambda (&key data &allow-other-keys)
-                        (message "ok")))))))
+                        (message "ok: %s" (if data data ""))))))))
     response))
 
 
@@ -812,14 +811,17 @@ When RELEASE-GROUP is non-nil MBID is for a release group, rather than release."
           (request-response-data
            (request
             (url-encode-url
-             (format "%s/release/%s" musicbrainz-coverart-api-url mbid))
+             (format "%s/release%s/%s"
+                     musicbrainz-coverart-api-url
+                     (if release-group "-group" "")
+                     mbid))
             :type "GET"
             :header (list `("User-Agent" . ,musicbrainz-user-agent))
             :parser 'json-read
             :sync t
             :success (cl-function
                       (lambda (&key data &allow-other-keys)
-                        (message "ok")))))))
+                        (message "ok: %s" (if data data ""))))))))
     response))
 
 (defun musicbrainz-coverart-file-front (mbid)
@@ -836,7 +838,7 @@ When RELEASE-GROUP is non-nil MBID is for a release group, rather than release."
             :sync t
             :success (cl-function
                       (lambda (&key data &allow-other-keys)
-                        (message "ok")))))))
+                        (message "ok: %s" (if data data ""))))))))
     response))
 
 (defun musicbrainz-coverart-file-back (mbid)
@@ -853,7 +855,7 @@ When RELEASE-GROUP is non-nil MBID is for a release group, rather than release."
             :sync t
             :success (cl-function
                       (lambda (&key data &allow-other-keys)
-                        (message "ok")))))))
+                        (message "ok: %s" (if data data ""))))))))
     response))
 
 
