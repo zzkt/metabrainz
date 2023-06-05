@@ -3,7 +3,6 @@
 #+author:
 #+title:  MusicBrainz & ListenBrainz & others
 
-* Thus                                                             :TOC_2_gh:
 - [[#musicbrainz][MusicBrainz]]
     - [[#musicbrainz-api][MusicBrainz API]]
     - [[#searching--browsing][searching & browsing]]
@@ -239,7 +238,6 @@ Search supports the full  [[https://lucene.apache.org/core/7_7_2/queryparser/org
 | (musicbrainz-lookup-work /MBID/)                        | [[https://musicbrainz.org/work/4ee2545d-2be5-3841-b568-0b4554eccc67][4ee2545d-2be5-3841-b568-0b4554eccc67]] |
 | (musicbrainz-lookup-url /MBID/)                         | …                                    |
 
-
 * ListenBrainz
 
 
@@ -387,7 +385,6 @@ https://listenbrainz.readthedocs.io/en/production/dev/api/#pinned-recording-api-
 | POST /1/pin/delete/(row_id)       | - |
 | GET /1/(user_name)/pins/following | - |
 | GET /1/(user_name)/pins           | - |
-
 
 * otherBrainz
  - [[https://critiquebrainz.org/][CritiqueBrainz]]
