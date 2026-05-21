@@ -1,10 +1,10 @@
 ;;; musicbrainz-interactive.el --- Interactive commands for MusicBrainz related things  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2026
+;; Copyright (C) 2026 Oliwier Czerwiński
 
 ;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: data, convenience, music
-;; Version: 20260520
+;; Version: 20260521
 ;; Package-Requires: ((emacs "28.1") (musicbrainz "0.1"))
 ;; URL: https://github.com/zzkt/metabrainz
 
@@ -26,7 +26,7 @@
 
 ;; Interactive commands that allow for searching MusicBrainz entities.
 ;; Also includes tools for making custom search functions.
-;; The code is written in a way that allow support from packages like
+;; The code is written in a way that allows support from packages like
 ;; Embark or Marginalia.
 
 ;;; Code:
