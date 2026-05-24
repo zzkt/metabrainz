@@ -4,7 +4,7 @@
 
 ;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: data, convenience, music
-;; Version: 20260521
+;; Version: 20260524
 ;; Package-Requires: ((emacs "28.1") (musicbrainz "0.1"))
 ;; URL: https://github.com/zzkt/metabrainz
 
@@ -736,7 +736,8 @@ descriptions."
 (defun musicbrainz-interactive-tag-annotate (tag)
   "Annotate the TAG.
 Tags have only `name' and `score' entries to their metadata so this
-function returns nil.")
+function returns nil."
+  nil)
 
 (defun musicbrainz-interactive-search-tag
     (query &optional limit offset)
@@ -765,7 +766,8 @@ descriptions."
   (alist-get 'resource url))
 
 (defun musicbrainz-interactive-url-annotate (url)
-  "Annotate the URL.")
+  "Annotate the URL."
+  nil)
 
 (defun musicbrainz-interactive-search-url
     (query &optional limit offset)
