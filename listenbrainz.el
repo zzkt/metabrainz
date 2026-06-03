@@ -7,7 +7,7 @@
 ;; Version: 0.1
 ;; Package-Requires: ((emacs "27.1") (request "0.3"))
 ;; Keywords: music, scrobbling, multimedia
-;; URL: https://github.com/zzkt/listenbrainz
+;; URL: https://github.com/zzkt/metabrainz
 
 ;; This file is not part of GNU Emacs.
 
