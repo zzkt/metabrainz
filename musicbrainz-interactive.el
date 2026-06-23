@@ -4,7 +4,7 @@
 
 ;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: data, convenience, music
-;; Version: 20260524
+;; Version: 20260622
 ;; Package-Requires: ((emacs "28.1") (musicbrainz "0.1"))
 ;; URL: https://github.com/zzkt/metabrainz
 
@@ -206,10 +206,10 @@ Example:
    :data item
    :items (sort-name
            (lambda (item)
-             (alist-get 'gender item))
+             (alist-get \\='gender item))
            disambiguation
            (lambda (item)
-             (alist-get 'tags item)))"
+             (alist-get \\='tags item)))"
   (let ((data  (plist-get args :data))
         (items (plist-get args :items)))
     `(let* ((values
@@ -737,6 +737,7 @@ descriptions."
   "Annotate the TAG.
 Tags have only `name' and `score' entries to their metadata so this
 function returns nil."
+  (ignore tag)
   nil)
 
 (defun musicbrainz-interactive-search-tag
@@ -767,6 +768,7 @@ descriptions."
 
 (defun musicbrainz-interactive-url-annotate (url)
   "Annotate the URL."
+  (ignore url)
   nil)
 
 (defun musicbrainz-interactive-search-url
