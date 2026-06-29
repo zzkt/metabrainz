@@ -4,7 +4,7 @@
 
 ;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: data, convenience, music
-;; Version: 20260622
+;; Version: 20260629
 ;; Package-Requires: ((emacs "28.1") (musicbrainz "0.1"))
 ;; URL: https://github.com/zzkt/metabrainz
 
@@ -281,8 +281,8 @@ there is none)."
 (defun musicbrainz-interactive-annotation-annotate (annotation)
   "Annotate the ANNOTATION."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data annotation)
-    :items (type name)))
+   :data (get-text-property 0 'data annotation)
+   :items (type name)))
 
 (defun musicbrainz-interactive-search-annotation
     (query &optional limit offset)
@@ -314,8 +314,8 @@ descriptions."
 (defun musicbrainz-interactive-area-annotate (area)
   "Annotate the AREA."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data area)
-    :items (type)))
+   :data (get-text-property 0 'data area)
+   :items (type)))
 
 (defun musicbrainz-interactive-search-area
     (query &optional limit offset)
@@ -350,8 +350,8 @@ descriptions."
 (defun musicbrainz-interactive-artist-annotate (artist)
   "Annotate the ARTIST."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data artist)
-    :items (disambiguation)))
+   :data (get-text-property 0 'data artist)
+   :items (disambiguation)))
 
 (defun musicbrainz-interactive-search-artist
     (query &optional limit offset)
@@ -384,8 +384,8 @@ descriptions."
 (defun musicbrainz-interactive-cdstub-annotate (cdstub)
   "Annotate the CDSTUB."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data cdstub)
-    :items (disambiguation)))
+   :data (get-text-property 0 'data cdstub)
+   :items (disambiguation)))
 
 (defun musicbrainz-interactive-open-cdstub (cdstub)
   "Open the CDSTUB in a MusicBrainz webpage."
@@ -422,20 +422,20 @@ descriptions."
 (defun musicbrainz-interactive-event-annotate (event)
   "Annotate the EVENT."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data event)
-    :items (disambiguation
-               type
-               (lambda (item)
-                 (let* ((life-span (alist-get 'life-span item))
-                        (begin (alist-get 'begin life-span))
-                        (end (alist-get 'end life-span)))
-                   (cond
-                    ((equal begin end)
-                     begin)
-                    ((and begin end)
-                     (format "%s - %s" begin end))
-                    (t
-                     (or begin end))))))))
+   :data (get-text-property 0 'data event)
+   :items (disambiguation
+           type
+           (lambda (item)
+             (let* ((life-span (alist-get 'life-span item))
+                    (begin (alist-get 'begin life-span))
+                    (end (alist-get 'end life-span)))
+               (cond
+                ((equal begin end)
+                 begin)
+                ((and begin end)
+                 (format "%s - %s" begin end))
+                (t
+                 (or begin end))))))))
 
 (defun musicbrainz-interactive-search-event
     (query &optional limit offset)
@@ -467,8 +467,8 @@ descriptions."
 (defun musicbrainz-interactive-instrument-annotate (instrument)
   "Annotate the INSTRUMENT."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data instrument)
-    :items (type)))
+   :data (get-text-property 0 'data instrument)
+   :items (type)))
 
 (defun musicbrainz-interactive-search-instrument
     (query &optional limit offset)
@@ -500,13 +500,13 @@ descriptions."
 (defun musicbrainz-interactive-label-annotate (label)
   "Annotate the LABEL."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data label)
-    :items ((lambda (item)
-                 (if (equal (alist-get 'name item)
-                            (alist-get 'sort-name item))
-                     nil
-                   (alist-get 'sort-name item)))
-               disambiguation)))
+   :data (get-text-property 0 'data label)
+   :items ((lambda (item)
+             (if (equal (alist-get 'name item)
+                        (alist-get 'sort-name item))
+                 nil
+               (alist-get 'sort-name item)))
+           disambiguation)))
 
 (defun musicbrainz-interactive-search-label
     (query &optional limit offset)
@@ -581,15 +581,15 @@ descriptions."
 (defun musicbrainz-interactive-recording-annotate (recording)
   "Annotate the RECORDING."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data recording)
-    :items ((lambda (item)
-                 (when (assoc 'length item)
-                   (let* ((total-seconds (/ (alist-get 'length item)
-                                            1000))
-                          (minutes (/ total-seconds 60))
-                          (seconds (% total-seconds 60)))
-                     (format "%d:%02d" minutes seconds))))
-               disambiguation)))
+   :data (get-text-property 0 'data recording)
+   :items ((lambda (item)
+             (when (assoc 'length item)
+               (let* ((total-seconds (/ (alist-get 'length item)
+                                        1000))
+                      (minutes (/ total-seconds 60))
+                      (seconds (% total-seconds 60)))
+                 (format "%d:%02d" minutes seconds))))
+           disambiguation)))
 
 (defun musicbrainz-interactive-search-recording
     (query &optional limit offset)
@@ -626,8 +626,8 @@ descriptions."
 (defun musicbrainz-interactive-release-annotate (release)
   "Annotate the RELEASE."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data release)
-    :items (status date disambiguation)))
+   :data (get-text-property 0 'data release)
+   :items (status date disambiguation)))
 
 (defun musicbrainz-interactive-search-release
     (query &optional limit offset)
@@ -665,14 +665,14 @@ descriptions."
     (release-group)
   "Annotate the RELEASE-GROUP."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data release-group)
-    :items (primary-type
-               (lambda (item)
-                 (when (assoc 'first-release-date item)
-                   (format "released: %s" (alist-get
-                                           'first-release-date
-                                           item))))
-               disambiguation)))
+   :data (get-text-property 0 'data release-group)
+   :items (primary-type
+           (lambda (item)
+             (when (assoc 'first-release-date item)
+               (format "released: %s" (alist-get
+                                       'first-release-date
+                                       item))))
+           disambiguation)))
 
 (defun musicbrainz-interactive-search-release-group
     (query &optional limit offset)
@@ -705,8 +705,8 @@ descriptions."
     (series)
   "Annotate the SERIES."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data series)
-    :items (type disambiguation)))
+   :data (get-text-property 0 'data series)
+   :items (type disambiguation)))
 
 (defun musicbrainz-interactive-search-series
     (query &optional limit offset)
@@ -801,8 +801,8 @@ descriptions."
 (defun musicbrainz-interactive-work-annotate (work)
   "Annotate the WORK."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data work)
-    :items (type disambiguation)))
+   :data (get-text-property 0 'data work)
+   :items (type disambiguation)))
 
 (defun musicbrainz-interactive-search-work
     (query &optional limit offset)
