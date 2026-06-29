@@ -153,6 +153,9 @@
   #'musicbrainz-interactive-work-annotate
   "The annotating function to be used for works.")
 
+(defvar musicbrainz-interactive-alias-default-locale "en"
+  "The default locale for retrieving aliases.")
+
 ;;; Generic functions
 
 (defun musicbrainz-interactive-prepare-for-completion
@@ -196,6 +199,26 @@ SPEC may be:
               ((stringp value) value)
               (t (format "%s" value)))))
          specs)))
+
+(defun musicbrainz-interactive-get-alias (item &optional locale)
+  "Retrieve primary alias from an ITEM with specified LOCALE.
+The primary alias is preffered.
+The default value of LOCALE is in
+ `musicbrainz-interactive-alias-default-locale'."
+  (let ((locale (or locale musicbrainz-interactive-alias-default-locale))
+        (aliases (alist-get 'aliases item)))
+    (when aliases
+      (alist-get 'name
+                 (or
+                  (cl-find-if
+                   (lambda (alias)
+                     (and (equal (alist-get 'locale alias) locale)
+                          (equal (alist-get 'primary alias) t)))
+                   (append aliases nil))
+                  (cl-find-if
+                   (lambda (alias)
+                     (equal (alist-get 'locale alias) locale))
+                   (append aliases nil)))))))
 
 (defmacro musicbrainz-interactive-annotate (&rest args)
   "Build annotation string from ITEM using ARGS (DATA and ITEMS specs).
@@ -340,12 +363,15 @@ descriptions."
 
 (defun musicbrainz-interactive-artist-format (artist)
   "Formatting function for ARTIST to be used in `completing-read'."
-  (concat (format "[%s]" (substring (alist-get 'id artist) 0 8))
-          " "
-          (alist-get 'name artist)
-          (unless (equal (alist-get 'sort-name artist)
-                         (alist-get 'name artist))
-            (format " (%s)" (alist-get 'sort-name artist)))))
+  (concat
+   (format "[%s] %s"
+           (substring (alist-get 'id artist) 0 8)
+           (alist-get 'name artist))
+   (if-let ((alias (musicbrainz-interactive-get-alias artist)))
+       (format " (%s)" alias)
+     (unless (equal (alist-get 'sort-name artist)
+                    (alist-get 'name artist))
+       (format " (%s)" (alist-get 'sort-name artist))))))
 
 (defun musicbrainz-interactive-artist-annotate (artist)
   "Annotate the ARTIST."
@@ -493,9 +519,12 @@ descriptions."
 
 (defun musicbrainz-interactive-label-format (label)
   "Formatting function for LABEL to be used in `completing-read'."
-  (format "[%s] %s"
+  (format "[%s] %s%s"
           (substring (alist-get 'id label) 0 8)
-          (alist-get 'name label)))
+          (alist-get 'name label)
+          (if-let ((alias (musicbrainz-interactive-get-alias label)))
+              (format " (%s)" alias)
+            "")))
 
 (defun musicbrainz-interactive-label-annotate (label)
   "Annotate the LABEL."
@@ -531,20 +560,23 @@ descriptions."
 
 (defun musicbrainz-interactive-place-format (place)
   "Formatting function for PLACE to be used in `completing-read'."
-  (format "[%s] %s"
+  (format "[%s] %s%s"
           (substring (alist-get 'id place) 0 8)
-          (alist-get 'name place)))
+          (alist-get 'name place)
+          (if-let ((alias (musicbrainz-interactive-get-alias place)))
+              (format " (%s)" alias)
+            "")))
 
 (defun musicbrainz-interactive-place-annotate (place)
   "Annotate the PLACE."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data place)
-    :items (type
-               (lambda (item)
-                 (if (equal (alist-get 'name item)
-                            (alist-get 'disambiguation item))
-                     nil
-                   (alist-get 'disambiguation item))))))
+   :data (get-text-property 0 'data place)
+   :items (type
+           (lambda (item)
+             (if (equal (alist-get 'name item)
+                        (alist-get 'disambiguation item))
+                 nil
+               (alist-get 'disambiguation item))))))
 
 (defun musicbrainz-interactive-search-place
     (query &optional limit offset)
@@ -697,9 +729,12 @@ descriptions."
 
 (defun musicbrainz-interactive-series-format (series)
   "Formatting function for SERIES to be used in `completing-read'."
-  (format "[%s] %s"
+  (format "[%s] %s%s"
           (substring (alist-get 'id series) 0 8)
-          (alist-get 'name series)))
+          (alist-get 'name series)
+          (if-let ((alias (musicbrainz-interactive-get-alias series)))
+              (format " (%s)" alias)
+            "")))
 
 (defun musicbrainz-interactive-series-annotate
     (series)
@@ -794,9 +829,12 @@ descriptions."
 
 (defun musicbrainz-interactive-work-format (work)
   "Formatting function for WORK to be used in `completing-read'."
-  (format "[%s] %s"
+  (format "[%s] %s%s"
           (substring (alist-get 'id work) 0 8)
-          (alist-get 'title work)))
+          (alist-get 'title work)
+          (if-let ((alias (musicbrainz-interactive-get-alias work)))
+              (format " (%s)" alias)
+            "")))
 
 (defun musicbrainz-interactive-work-annotate (work)
   "Annotate the WORK."
