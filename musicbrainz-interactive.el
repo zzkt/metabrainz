@@ -4,7 +4,7 @@
 
 ;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: data, convenience, music
-;; Version: 20260622
+;; Version: 20260629
 ;; Package-Requires: ((emacs "28.1") (musicbrainz "0.1"))
 ;; URL: https://github.com/zzkt/metabrainz
 
@@ -153,6 +153,9 @@
   #'musicbrainz-interactive-work-annotate
   "The annotating function to be used for works.")
 
+(defvar musicbrainz-interactive-alias-default-locale "en"
+  "The default locale for retrieving aliases.")
+
 ;;; Generic functions
 
 (defun musicbrainz-interactive-prepare-for-completion
@@ -196,6 +199,26 @@ SPEC may be:
               ((stringp value) value)
               (t (format "%s" value)))))
          specs)))
+
+(defun musicbrainz-interactive-get-alias (item &optional locale)
+  "Retrieve primary alias from an ITEM with specified LOCALE.
+The primary alias is preffered.
+The default value of LOCALE is in
+ `musicbrainz-interactive-alias-default-locale'."
+  (let ((locale (or locale musicbrainz-interactive-alias-default-locale))
+        (aliases (alist-get 'aliases item)))
+    (when aliases
+      (alist-get 'name
+                 (or
+                  (cl-find-if
+                   (lambda (alias)
+                     (and (equal (alist-get 'locale alias) locale)
+                          (equal (alist-get 'primary alias) t)))
+                   (append aliases nil))
+                  (cl-find-if
+                   (lambda (alias)
+                     (equal (alist-get 'locale alias) locale))
+                   (append aliases nil)))))))
 
 (defmacro musicbrainz-interactive-annotate (&rest args)
   "Build annotation string from ITEM using ARGS (DATA and ITEMS specs).
@@ -281,8 +304,8 @@ there is none)."
 (defun musicbrainz-interactive-annotation-annotate (annotation)
   "Annotate the ANNOTATION."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data annotation)
-    :items (type name)))
+   :data (get-text-property 0 'data annotation)
+   :items (type name)))
 
 (defun musicbrainz-interactive-search-annotation
     (query &optional limit offset)
@@ -314,8 +337,8 @@ descriptions."
 (defun musicbrainz-interactive-area-annotate (area)
   "Annotate the AREA."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data area)
-    :items (type)))
+   :data (get-text-property 0 'data area)
+   :items (type)))
 
 (defun musicbrainz-interactive-search-area
     (query &optional limit offset)
@@ -340,18 +363,21 @@ descriptions."
 
 (defun musicbrainz-interactive-artist-format (artist)
   "Formatting function for ARTIST to be used in `completing-read'."
-  (concat (format "[%s]" (substring (alist-get 'id artist) 0 8))
-          " "
-          (alist-get 'name artist)
-          (unless (equal (alist-get 'sort-name artist)
-                         (alist-get 'name artist))
-            (format " (%s)" (alist-get 'sort-name artist)))))
+  (concat
+   (format "[%s] %s"
+           (substring (alist-get 'id artist) 0 8)
+           (alist-get 'name artist))
+   (if-let ((alias (musicbrainz-interactive-get-alias artist)))
+       (format " (%s)" alias)
+     (unless (equal (alist-get 'sort-name artist)
+                    (alist-get 'name artist))
+       (format " (%s)" (alist-get 'sort-name artist))))))
 
 (defun musicbrainz-interactive-artist-annotate (artist)
   "Annotate the ARTIST."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data artist)
-    :items (disambiguation)))
+   :data (get-text-property 0 'data artist)
+   :items (disambiguation)))
 
 (defun musicbrainz-interactive-search-artist
     (query &optional limit offset)
@@ -384,8 +410,8 @@ descriptions."
 (defun musicbrainz-interactive-cdstub-annotate (cdstub)
   "Annotate the CDSTUB."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data cdstub)
-    :items (disambiguation)))
+   :data (get-text-property 0 'data cdstub)
+   :items (disambiguation)))
 
 (defun musicbrainz-interactive-open-cdstub (cdstub)
   "Open the CDSTUB in a MusicBrainz webpage."
@@ -422,20 +448,20 @@ descriptions."
 (defun musicbrainz-interactive-event-annotate (event)
   "Annotate the EVENT."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data event)
-    :items (disambiguation
-               type
-               (lambda (item)
-                 (let* ((life-span (alist-get 'life-span item))
-                        (begin (alist-get 'begin life-span))
-                        (end (alist-get 'end life-span)))
-                   (cond
-                    ((equal begin end)
-                     begin)
-                    ((and begin end)
-                     (format "%s - %s" begin end))
-                    (t
-                     (or begin end))))))))
+   :data (get-text-property 0 'data event)
+   :items (disambiguation
+           type
+           (lambda (item)
+             (let* ((life-span (alist-get 'life-span item))
+                    (begin (alist-get 'begin life-span))
+                    (end (alist-get 'end life-span)))
+               (cond
+                ((equal begin end)
+                 begin)
+                ((and begin end)
+                 (format "%s - %s" begin end))
+                (t
+                 (or begin end))))))))
 
 (defun musicbrainz-interactive-search-event
     (query &optional limit offset)
@@ -467,8 +493,8 @@ descriptions."
 (defun musicbrainz-interactive-instrument-annotate (instrument)
   "Annotate the INSTRUMENT."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data instrument)
-    :items (type)))
+   :data (get-text-property 0 'data instrument)
+   :items (type)))
 
 (defun musicbrainz-interactive-search-instrument
     (query &optional limit offset)
@@ -493,20 +519,23 @@ descriptions."
 
 (defun musicbrainz-interactive-label-format (label)
   "Formatting function for LABEL to be used in `completing-read'."
-  (format "[%s] %s"
+  (format "[%s] %s%s"
           (substring (alist-get 'id label) 0 8)
-          (alist-get 'name label)))
+          (alist-get 'name label)
+          (if-let ((alias (musicbrainz-interactive-get-alias label)))
+              (format " (%s)" alias)
+            "")))
 
 (defun musicbrainz-interactive-label-annotate (label)
   "Annotate the LABEL."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data label)
-    :items ((lambda (item)
-                 (if (equal (alist-get 'name item)
-                            (alist-get 'sort-name item))
-                     nil
-                   (alist-get 'sort-name item)))
-               disambiguation)))
+   :data (get-text-property 0 'data label)
+   :items ((lambda (item)
+             (if (equal (alist-get 'name item)
+                        (alist-get 'sort-name item))
+                 nil
+               (alist-get 'sort-name item)))
+           disambiguation)))
 
 (defun musicbrainz-interactive-search-label
     (query &optional limit offset)
@@ -531,20 +560,23 @@ descriptions."
 
 (defun musicbrainz-interactive-place-format (place)
   "Formatting function for PLACE to be used in `completing-read'."
-  (format "[%s] %s"
+  (format "[%s] %s%s"
           (substring (alist-get 'id place) 0 8)
-          (alist-get 'name place)))
+          (alist-get 'name place)
+          (if-let ((alias (musicbrainz-interactive-get-alias place)))
+              (format " (%s)" alias)
+            "")))
 
 (defun musicbrainz-interactive-place-annotate (place)
   "Annotate the PLACE."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data place)
-    :items (type
-               (lambda (item)
-                 (if (equal (alist-get 'name item)
-                            (alist-get 'disambiguation item))
-                     nil
-                   (alist-get 'disambiguation item))))))
+   :data (get-text-property 0 'data place)
+   :items (type
+           (lambda (item)
+             (if (equal (alist-get 'name item)
+                        (alist-get 'disambiguation item))
+                 nil
+               (alist-get 'disambiguation item))))))
 
 (defun musicbrainz-interactive-search-place
     (query &optional limit offset)
@@ -581,15 +613,15 @@ descriptions."
 (defun musicbrainz-interactive-recording-annotate (recording)
   "Annotate the RECORDING."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data recording)
-    :items ((lambda (item)
-                 (when (assoc 'length item)
-                   (let* ((total-seconds (/ (alist-get 'length item)
-                                            1000))
-                          (minutes (/ total-seconds 60))
-                          (seconds (% total-seconds 60)))
-                     (format "%d:%02d" minutes seconds))))
-               disambiguation)))
+   :data (get-text-property 0 'data recording)
+   :items ((lambda (item)
+             (when (assoc 'length item)
+               (let* ((total-seconds (/ (alist-get 'length item)
+                                        1000))
+                      (minutes (/ total-seconds 60))
+                      (seconds (% total-seconds 60)))
+                 (format "%d:%02d" minutes seconds))))
+           disambiguation)))
 
 (defun musicbrainz-interactive-search-recording
     (query &optional limit offset)
@@ -626,8 +658,8 @@ descriptions."
 (defun musicbrainz-interactive-release-annotate (release)
   "Annotate the RELEASE."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data release)
-    :items (status date disambiguation)))
+   :data (get-text-property 0 'data release)
+   :items (status date disambiguation)))
 
 (defun musicbrainz-interactive-search-release
     (query &optional limit offset)
@@ -665,14 +697,14 @@ descriptions."
     (release-group)
   "Annotate the RELEASE-GROUP."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data release-group)
-    :items (primary-type
-               (lambda (item)
-                 (when (assoc 'first-release-date item)
-                   (format "released: %s" (alist-get
-                                           'first-release-date
-                                           item))))
-               disambiguation)))
+   :data (get-text-property 0 'data release-group)
+   :items (primary-type
+           (lambda (item)
+             (when (assoc 'first-release-date item)
+               (format "released: %s" (alist-get
+                                       'first-release-date
+                                       item))))
+           disambiguation)))
 
 (defun musicbrainz-interactive-search-release-group
     (query &optional limit offset)
@@ -697,16 +729,19 @@ descriptions."
 
 (defun musicbrainz-interactive-series-format (series)
   "Formatting function for SERIES to be used in `completing-read'."
-  (format "[%s] %s"
+  (format "[%s] %s%s"
           (substring (alist-get 'id series) 0 8)
-          (alist-get 'name series)))
+          (alist-get 'name series)
+          (if-let ((alias (musicbrainz-interactive-get-alias series)))
+              (format " (%s)" alias)
+            "")))
 
 (defun musicbrainz-interactive-series-annotate
     (series)
   "Annotate the SERIES."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data series)
-    :items (type disambiguation)))
+   :data (get-text-property 0 'data series)
+   :items (type disambiguation)))
 
 (defun musicbrainz-interactive-search-series
     (query &optional limit offset)
@@ -794,15 +829,18 @@ descriptions."
 
 (defun musicbrainz-interactive-work-format (work)
   "Formatting function for WORK to be used in `completing-read'."
-  (format "[%s] %s"
+  (format "[%s] %s%s"
           (substring (alist-get 'id work) 0 8)
-          (alist-get 'title work)))
+          (alist-get 'title work)
+          (if-let ((alias (musicbrainz-interactive-get-alias work)))
+              (format " (%s)" alias)
+            "")))
 
 (defun musicbrainz-interactive-work-annotate (work)
   "Annotate the WORK."
   (musicbrainz-interactive-annotate
-      :data (get-text-property 0 'data work)
-    :items (type disambiguation)))
+   :data (get-text-property 0 'data work)
+   :items (type disambiguation)))
 
 (defun musicbrainz-interactive-search-work
     (query &optional limit offset)
