@@ -4,7 +4,7 @@
 
 ;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: data, convenience, music
-;; Version: 20260629
+;; Version: 20260707
 ;; Package-Requires: ((emacs "28.1") (musicbrainz "0.1"))
 ;; URL: https://github.com/zzkt/metabrainz
 
@@ -307,6 +307,7 @@ there is none)."
    :data (get-text-property 0 'data annotation)
    :items (type name)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-annotation
     (query &optional limit offset)
   "Entery a QUERY to search for an annotation.
@@ -340,6 +341,7 @@ descriptions."
    :data (get-text-property 0 'data area)
    :items (type)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-area
     (query &optional limit offset)
   "Enter a QUERY to search for an area.
@@ -379,6 +381,7 @@ descriptions."
    :data (get-text-property 0 'data artist)
    :items (disambiguation)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-artist
     (query &optional limit offset)
   "Enter a QUERY to search for an artist.
@@ -418,6 +421,7 @@ descriptions."
   (interactive "sCD stub: ")
   (browse-url (format "https://musicbrainz.org/cdstub/%s" cdstub)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-cdstub
     (query &optional limit offset)
   "Enter a QUERY to search for a CD stub.
@@ -463,6 +467,7 @@ descriptions."
                 (t
                  (or begin end))))))))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-event
     (query &optional limit offset)
   "Enter a QUERY to search for an event.
@@ -496,6 +501,7 @@ descriptions."
    :data (get-text-property 0 'data instrument)
    :items (type)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-instrument
     (query &optional limit offset)
   "Enter a QUERY to search for an instrument.
@@ -537,6 +543,7 @@ descriptions."
                (alist-get 'sort-name item)))
            disambiguation)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-label
     (query &optional limit offset)
   "Enter a QUERY to search for a label.
@@ -578,6 +585,7 @@ descriptions."
                  nil
                (alist-get 'disambiguation item))))))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-place
     (query &optional limit offset)
   "Enter a QUERY to search for a place.
@@ -623,6 +631,7 @@ descriptions."
                  (format "%d:%02d" minutes seconds))))
            disambiguation)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-recording
     (query &optional limit offset)
   "Enter a QUERY to search for a recording.
@@ -661,6 +670,7 @@ descriptions."
    :data (get-text-property 0 'data release)
    :items (status date disambiguation)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-release
     (query &optional limit offset)
   "Enter a QUERY to search for a release.
@@ -706,6 +716,7 @@ descriptions."
                                        item))))
            disambiguation)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-release-group
     (query &optional limit offset)
   "Enter a QUERY to search for a release group.
@@ -743,6 +754,7 @@ descriptions."
    :data (get-text-property 0 'data series)
    :items (type disambiguation)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-series
     (query &optional limit offset)
   "Enter a QUERY to search for a series.
@@ -775,6 +787,7 @@ function returns nil."
   (ignore tag)
   nil)
 
+;;;###autoload
 (defun musicbrainz-interactive-search-tag
     (query &optional limit offset)
   "Enter a QUERY to search for a tag.
@@ -806,6 +819,7 @@ descriptions."
   (ignore url)
   nil)
 
+;;;###autoload
 (defun musicbrainz-interactive-search-url
     (query &optional limit offset)
   "Enter a QUERY to search for an URL.
@@ -842,6 +856,7 @@ descriptions."
    :data (get-text-property 0 'data work)
    :items (type disambiguation)))
 
+;;;###autoload
 (defun musicbrainz-interactive-search-work
     (query &optional limit offset)
   "Enter a QUERY to search for a work.
