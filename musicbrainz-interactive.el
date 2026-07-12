@@ -4,7 +4,7 @@
 
 ;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: data, convenience, music
-;; Version: 20260707
+;; Version: 20260712
 ;; Package-Requires: ((emacs "28.1") (musicbrainz "0.1"))
 ;; URL: https://github.com/zzkt/metabrainz
 
@@ -41,6 +41,12 @@
   #'musicbrainz-interactive-annotation-annotate
   "The annotating function to be used for annotations.")
 
+(defvar musicbrainz-interactive-annotation-history nil
+  "The list of recently chosen annotations.")
+
+(defvar musicbrainz-interactive-annotation-query-history nil
+  "The list of recent annotation queries.")
+
 (defvar musicbrainz-interactive-area-format-function
   #'musicbrainz-interactive-area-format
   "The formatting function to be used for areas.")
@@ -48,6 +54,12 @@
 (defvar musicbrainz-interactive-area-annotate-function
   #'musicbrainz-interactive-area-annotate
   "The annotating function to be used for areas.")
+
+(defvar musicbrainz-interactive-area-history nil
+  "The list of recently chosen areas.")
+
+(defvar musicbrainz-interactive-area-query-history nil
+  "The list of recent area queries.")
 
 (defvar musicbrainz-interactive-artist-format-function
   #'musicbrainz-interactive-artist-format
@@ -57,6 +69,12 @@
   #'musicbrainz-interactive-artist-annotate
   "The annotating function to be used for artists.")
 
+(defvar musicbrainz-interactive-artist-history nil
+  "The list of recently chosen artists.")
+
+(defvar musicbrainz-interactive-artist-query-history nil
+  "The list of recent artist queries.")
+
 (defvar musicbrainz-interactive-cdstub-format-function
   #'musicbrainz-interactive-cdstub-format
   "The formatting function to be used for CD stubs.")
@@ -64,6 +82,12 @@
 (defvar musicbrainz-interactive-cdstub-annotate-function
   #'musicbrainz-interactive-cdstub-annotate
   "The annotating function to be used for CD stubs.")
+
+(defvar musicbrainz-interactive-cdstub-history nil
+  "The list of recently chosen cdstubs.")
+
+(defvar musicbrainz-interactive-cdstub-query-history nil
+  "The list of recent cdstub queries.")
 
 (defvar musicbrainz-interactive-event-format-function
   #'musicbrainz-interactive-event-format
@@ -73,6 +97,12 @@
   #'musicbrainz-interactive-event-annotate
   "The annotating function to be used for events.")
 
+(defvar musicbrainz-interactive-event-history nil
+  "The list of recently chosen events.")
+
+(defvar musicbrainz-interactive-event-query-history nil
+  "The list of recent event queries.")
+
 (defvar musicbrainz-interactive-instrument-format-function
   #'musicbrainz-interactive-instrument-format
   "The formatting function to be used for instruments.")
@@ -80,6 +110,12 @@
 (defvar musicbrainz-interactive-instrument-annotate-function
   #'musicbrainz-interactive-instrument-annotate
   "The annotating function to be used for instruments.")
+
+(defvar musicbrainz-interactive-instrument-history nil
+  "The list of recently chosen instruments.")
+
+(defvar musicbrainz-interactive-instrument-query-history nil
+  "The list of recent instrument queries.")
 
 (defvar musicbrainz-interactive-label-format-function
   #'musicbrainz-interactive-label-format
@@ -89,6 +125,12 @@
   #'musicbrainz-interactive-label-annotate
   "The annotating function to be used for labels.")
 
+(defvar musicbrainz-interactive-label-history nil
+  "The list of recently chosen labels.")
+
+(defvar musicbrainz-interactive-label-query-history nil
+  "The list of recent label queries.")
+
 (defvar musicbrainz-interactive-place-format-function
   #'musicbrainz-interactive-place-format
   "The formatting function to be used for places.")
@@ -96,6 +138,12 @@
 (defvar musicbrainz-interactive-place-annotate-function
   #'musicbrainz-interactive-place-annotate
   "The annotating function to be used for places.")
+
+(defvar musicbrainz-interactive-place-history nil
+  "The list of recently chosen places.")
+
+(defvar musicbrainz-interactive-place-query-history nil
+  "The list of recent place queries.")
 
 (defvar musicbrainz-interactive-recording-format-function
   #'musicbrainz-interactive-recording-format
@@ -105,6 +153,12 @@
   #'musicbrainz-interactive-recording-annotate
   "The annotating function to be used for recordings.")
 
+(defvar musicbrainz-interactive-recording-history nil
+  "The list of recently chosen recordings.")
+
+(defvar musicbrainz-interactive-recording-query-history nil
+  "The list of recent recording queries.")
+
 (defvar musicbrainz-interactive-release-format-function
   #'musicbrainz-interactive-release-format
   "The formatting function to be used for releases.")
@@ -112,6 +166,12 @@
 (defvar musicbrainz-interactive-release-annotate-function
   #'musicbrainz-interactive-release-annotate
   "The annotating function to be used for releases.")
+
+(defvar musicbrainz-interactive-release-history nil
+  "The list of recently chosen releases.")
+
+(defvar musicbrainz-interactive-release-query-history nil
+  "The list of recent release queries.")
 
 (defvar musicbrainz-interactive-release-group-format-function
   #'musicbrainz-interactive-release-group-format
@@ -121,6 +181,12 @@
   #'musicbrainz-interactive-release-group-annotate
   "The annotating function to be used for release groups.")
 
+(defvar musicbrainz-interactive-release-group-history nil
+  "The list of recently chosen release groups.")
+
+(defvar musicbrainz-interactive-release-group-query-history nil
+  "The list of recent release group queries.")
+
 (defvar musicbrainz-interactive-series-format-function
   #'musicbrainz-interactive-series-format
   "The formatting function to be used for series.")
@@ -128,6 +194,12 @@
 (defvar musicbrainz-interactive-series-annotate-function
   #'musicbrainz-interactive-series-annotate
   "The annotating function to be used for series.")
+
+(defvar musicbrainz-interactive-series-history nil
+  "The list of recently chosen series.")
+
+(defvar musicbrainz-interactive-series-query-history nil
+  "The list of recent serie queries.")
 
 (defvar musicbrainz-interactive-tag-format-function
   #'musicbrainz-interactive-tag-format
@@ -137,6 +209,12 @@
   #'musicbrainz-interactive-tag-annotate
   "The annotating function to be used for tags.")
 
+(defvar musicbrainz-interactive-tag-history nil
+  "The list of recently chosen tags.")
+
+(defvar musicbrainz-interactive-tag-query-history nil
+  "The list of recent tag queries.")
+
 (defvar musicbrainz-interactive-url-format-function
   #'musicbrainz-interactive-url-format
   "The formatting function to be used for URLs.")
@@ -145,6 +223,12 @@
   #'musicbrainz-interactive-url-annotate
   "The annotating function to be used for URLs.")
 
+(defvar musicbrainz-interactive-url-history nil
+  "The list of recently chosen urls.")
+
+(defvar musicbrainz-interactive-url-query-history nil
+  "The list of recent url queries.")
+
 (defvar musicbrainz-interactive-work-format-function
   #'musicbrainz-interactive-work-format
   "The formatting function to be used for works.")
@@ -152,6 +236,12 @@
 (defvar musicbrainz-interactive-work-annotate-function
   #'musicbrainz-interactive-work-annotate
   "The annotating function to be used for works.")
+
+(defvar musicbrainz-interactive-work-history nil
+  "The list of recently chosen works.")
+
+(defvar musicbrainz-interactive-work-query-history nil
+  "The list of recent work queries.")
 
 (defvar musicbrainz-interactive-alias-default-locale "en"
   "The default locale for retrieving aliases.")
@@ -285,7 +375,9 @@ there is none)."
          (choice
           (completing-read
            completion-prompt
-           data nil t))
+           data nil t
+           (intern (format "musicbrainz-interactive-%s-history"
+                           entity))))
          (item
           (get-text-property
            0 'data
@@ -313,7 +405,10 @@ there is none)."
   "Entery a QUERY to search for an annotation.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sAnnotation: ")
+  (interactive
+   (list
+    (read-string "Annotation: " nil
+                 'musicbrainz-interactive-annotation-query-history)))
   (musicbrainz-interactive-search
    "annotation"
    query
@@ -347,7 +442,11 @@ descriptions."
   "Enter a QUERY to search for an area.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sArea: ")
+  (interactive
+   (list
+    (read-string "Area: " nil
+                 'musicbrainz-interactive-area-query-history)))
+
   (musicbrainz-interactive-search
    "area"
    query
@@ -387,7 +486,10 @@ descriptions."
   "Enter a QUERY to search for an artist.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sArtist: ")
+  (interactive
+   (list
+    (read-string "Artist: " nil
+                 'musicbrainz-interactive-artist-query-history)))
   (musicbrainz-interactive-search
    "artist"
    query
@@ -418,7 +520,10 @@ descriptions."
 
 (defun musicbrainz-interactive-open-cdstub (cdstub)
   "Open the CDSTUB in a MusicBrainz webpage."
-  (interactive "sCD stub: ")
+  (interactive
+   (list
+    (read-string "CD stub: " nil 'musicbrainz-interactive-CD
+                 stub-query-history)))
   (browse-url (format "https://musicbrainz.org/cdstub/%s" cdstub)))
 
 ;;;###autoload
@@ -427,7 +532,10 @@ descriptions."
   "Enter a QUERY to search for a CD stub.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sCD stub: ")
+  (interactive
+   (list
+    (read-string "CD stub: " nil
+                 'musicbrainz-interactive-cd-stub-query-history)))
   (musicbrainz-interactive-search
    "cdstub"
    query
@@ -473,7 +581,10 @@ descriptions."
   "Enter a QUERY to search for an event.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sEvent: ")
+  (interactive
+   (list
+    (read-string "Event: " nil
+                 'musicbrainz-interactive-event-query-history)))
   (musicbrainz-interactive-search
    "event"
    query
@@ -507,7 +618,10 @@ descriptions."
   "Enter a QUERY to search for an instrument.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sInstrument: ")
+  (interactive
+   (list
+    (read-string "Instrument: " nil
+                 'musicbrainz-interactive-instrument-query-history)))
   (musicbrainz-interactive-search
    "instrument"
    query
@@ -549,7 +663,10 @@ descriptions."
   "Enter a QUERY to search for a label.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sLabel: ")
+  (interactive
+   (list
+    (read-string "Label: " nil
+                 'musicbrainz-interactive-label-query-history)))
   (musicbrainz-interactive-search
    "label"
    query
@@ -591,7 +708,10 @@ descriptions."
   "Enter a QUERY to search for a place.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sPlace: ")
+  (interactive
+   (list
+    (read-string "Place: " nil
+                 'musicbrainz-interactive-place-query-history)))
   (musicbrainz-interactive-search
    "place"
    query
@@ -637,7 +757,10 @@ descriptions."
   "Enter a QUERY to search for a recording.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sRecording: ")
+  (interactive
+   (list
+    (read-string "Recording: " nil
+                 'musicbrainz-interactive-recording-query-history)))
   (musicbrainz-interactive-search
    "recording"
    query
@@ -676,7 +799,10 @@ descriptions."
   "Enter a QUERY to search for a release.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sRelease: ")
+  (interactive
+   (list
+    (read-string "Release: " nil
+                 'musicbrainz-interactive-release-query-history)))
   (musicbrainz-interactive-search
    "release"
    query
@@ -722,7 +848,10 @@ descriptions."
   "Enter a QUERY to search for a release group.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sRelease group: ")
+  (interactive
+   (list
+    (read-string "Release group: " nil
+                 'musicbrainz-interactive-release-group-query-history)))
   (musicbrainz-interactive-search
    "release-group"
    query
@@ -760,7 +889,10 @@ descriptions."
   "Enter a QUERY to search for a series.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sSeries: ")
+  (interactive
+   (list
+    (read-string "Series: " nil
+                 'musicbrainz-interactive-series-query-history)))
   (musicbrainz-interactive-search
    "series"
    query
@@ -793,7 +925,11 @@ function returns nil."
   "Enter a QUERY to search for a tag.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sTag: ")
+  (interactive
+   (list
+    (read-string "Tag: " nil
+                 'musicbrainz-interactive-tag-query-history)))
+
   (musicbrainz-interactive-search
    "tag"
    query
@@ -825,7 +961,11 @@ descriptions."
   "Enter a QUERY to search for an URL.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sURL: ")
+  (interactive
+   (list
+    (read-string "URL: " nil
+                 'musicbrainz-interactive-url-query-history)))
+
   (musicbrainz-interactive-search
    "url"
    query
@@ -862,7 +1002,11 @@ descriptions."
   "Enter a QUERY to search for a work.
 Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
 descriptions."
-  (interactive "sWork: ")
+  (interactive
+   (list
+    (read-string "Work: " nil
+                 'musicbrainz-interactive-work-query-history)))
+
   (musicbrainz-interactive-search
    "work"
    query
