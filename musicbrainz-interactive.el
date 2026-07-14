@@ -375,7 +375,7 @@ there is none)."
          (choice
           (completing-read
            completion-prompt
-           data nil t
+           data nil t nil
            (intern (format "musicbrainz-interactive-%s-history"
                            entity))))
          (item
