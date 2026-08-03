@@ -201,6 +201,56 @@ Search supports the full  [[https://lucene.apache.org/core/7_7_2/queryparser/org
 | (musicbrainz-search-release /query/ &optional /limit/)       |   |
 | (musicbrainz-search-work /query/ &optional /limit/)   |   |
 
+**** Interactive functions
+=musicbrainz-interactive= defines functions that make creating searching commands easier.
+
+It provides search commands:
+- =musicbrainz-interactive-search-annotation=
+- =musicbrainz-interactive-search-area=
+- =musicbrainz-interactive-search-artist=
+- =musicbrainz-interactive-search-cdstub=
+- =musicbrainz-interactive-search-event=
+- =musicbrainz-interactive-search-instrument=
+- =musicbrainz-interactive-search-label=
+- =musicbrainz-interactive-search-place=
+- =musicbrainz-interactive-search-recording=
+- =musicbrainz-interactive-search-release=
+- =musicbrainz-interactive-search-release-group=
+- =musicbrainz-interactive-search-series=
+- =musicbrainz-interactive-search-tag=
+- =musicbrainz-interactive-search-url=
+- =musicbrainz-interactive-search-work=
+
+These commands take a query string as an argument, make the query, let the user choose from the search results, then open the result in a web browser.
+They also have separate completion categories for every entity and use propertized strings (every candidate has their query data attached to them via a text property) which allows for integration with packages like [[https://github.com/oantolin/embark][embark]].
+They also use Emacs' built-in annotation facilities (usually used for disambiguation or other information).
+
+These are built with helper functions that make working with the entities easier and can be used to make custom functions.
+
+For example, this custom function will open the relationships page of a searched artist.
+#+BEGIN_SRC emacs-lisp
+(defun musicbrainz-interactive-search-artist-relationships
+    (query &optional limit offset)
+  "Enter a QUERY to search for an artist and open their relationships page.
+Look at `musicbrainz-interactive-search' for LIMIT and OFFSET
+descriptions."
+  (interactive "sArtist: ")
+  (musicbrainz-interactive-search
+   "artist"
+   query
+   'artists
+   "Artist: "
+   musicbrainz-interactive-artist-format-function
+   musicbrainz-interactive-artist-annotate-function
+   (lambda (item)
+     (alist-get 'id item))
+   (lambda (mbid)
+     (browse-url
+      (format "https://musicbrainz.org/artist/%s/relationships" mbid)))
+   limit
+   offset))
+#+END_SRC
+
 *** Lookup queries & subqueries
 
 | (musicbrainz-lookup /entity/ /MBID/ &optional /inc/) | valid entities listed in =musicbrainz-entities-core= |

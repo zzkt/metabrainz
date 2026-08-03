@@ -4,7 +4,7 @@
 
 ;; Author:  Oliwier Czerwiński <oliwier.czerwi@proton.me>
 ;; Keywords: data, convenience, music
-;; Version: 20260712
+;; Version: 20260802
 ;; Package-Requires: ((emacs "28.1") (musicbrainz "0.1"))
 ;; URL: https://github.com/zzkt/metabrainz
 
@@ -522,8 +522,8 @@ descriptions."
   "Open the CDSTUB in a MusicBrainz webpage."
   (interactive
    (list
-    (read-string "CD stub: " nil 'musicbrainz-interactive-CD
-                 stub-query-history)))
+    (read-string "CD stub: " nil
+                 'musicbrainz-interactive-cdstub-query-history)))
   (browse-url (format "https://musicbrainz.org/cdstub/%s" cdstub)))
 
 ;;;###autoload
